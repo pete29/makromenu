@@ -87,7 +87,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 Scaling works on recipe-level kcal from the PDF: calories are linear in ingredient weights, so a portion's factor is target ÷ kcal per serving. The ingredient database (Phase 2) is only needed for exact kcal after rounding and for store sections.
 
 - [x] Person profile: calorie target (default 1500), meals with percentage split ([src/engine/profile.ts](src/engine/profile.ts))
-- [ ] With a large calorie gap between people: an extra snack instead of extreme scaling
+- [x] With a large calorie gap between people: an extra snack for one person; their daily kcal is re-split across the meals they actually eat ([src/engine/plan.ts](src/engine/plan.ts))
 - [x] Meal calorie target = daily target × meal share
 - [x] Scaling factor = meal target ÷ kcal per serving (accounting for `porcje: N`) ([src/engine/scaling.ts](src/engine/scaling.ts))
 - [~] Common-sense rules:
@@ -98,8 +98,9 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
   - [ ] recalculate real kcal after rounding and show the difference from the target (needs Phase 2)
 - [x] Portions for two people from one recipe: one pot "to cook" for the sum of portions + each person's share and kcal/macros "per plate"
 - [x] Polish unit inflection: 1 sztuka, 2 sztuki, 5 sztuk, 1.5 sztuki ([src/engine/units.ts](src/engine/units.ts))
-- [ ] Daily summary: kcal and macros per person
-- [ ] Shopping list: sum of weights over the selected range of days for both people, grouped by section
+- [x] Daily summary: kcal and macros per person
+- [~] Shopping list: sum of weights over the selected meals for both people, merged by name, household units summed when they match, water skipped
+  - [ ] grouped by store section (needs Phase 2)
 - [~] Unit tests (Vitest), on made-up sample recipes (`npm test`)
 
 ## Phase 4: App data layer
