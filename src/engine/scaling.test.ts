@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { plateIngredients, portionMeal, roundAmount, roundGrams } from './scaling'
+import { portionMeal, roundAmount, roundGrams, splitIntoPlates } from './scaling'
 import type { Recipe } from './types'
 
 const omelette: Recipe = {
@@ -68,14 +68,33 @@ describe('portionMeal', () => {
   })
 })
 
-describe('plateIngredients', () => {
-  it('gives each person their share of the pot, without pinches', () => {
+describe('splitIntoPlates', () => {
+  it('gives each person their share of the pot, without pinches, using up the pot', () => {
     const { cook, plates } = portionMeal(omelette, [400, 600])
-    expect(plateIngredients(cook, plates[0].share)).toEqual([
-      { name: 'Jajko kurze całe', grams: 112, amount: 2, unit: 'sztuki' },
-      { name: 'Szynka z indyka', grams: 30 },
-      { name: 'Masło extra', grams: 5, amount: 1, unit: 'łyżeczka' },
-      { name: 'Szczypiorek siekany', grams: 6 },
+    expect(splitIntoPlates(cook, plates.map((p) => p.share))).toEqual([
+      [
+        { name: 'Jajko kurze całe', grams: 112, amount: 2, unit: 'sztuki' },
+        { name: 'Szynka z indyka', grams: 30 },
+        { name: 'Masło extra', grams: 5, amount: 1, unit: 'łyżeczka' },
+        { name: 'Szczypiorek siekany', grams: 6 },
+      ],
+      // the rest of the pot: 5 eggs, 75 g, 2.5 tsp, 15 g
+      [
+        { name: 'Jajko kurze całe', grams: 168, amount: 3, unit: 'sztuki' },
+        { name: 'Szynka z indyka', grams: 45 },
+        { name: 'Masło extra', grams: 7.5, amount: 1.5, unit: 'łyżeczka' },
+        { name: 'Szczypiorek siekany', grams: 9 },
+      ],
+    ])
+  })
+
+  it('leaves an ingredient off a plate when nothing is left for it', () => {
+    const cook = [{ name: 'Cebula', grams: 40, amount: 0.5, unit: 'sztuki', scaled: true }]
+    // each third rounds up to 0.25, so the third plate gets nothing
+    expect(splitIntoPlates(cook, [1 / 3, 1 / 3, 1 / 3]).map((p) => p.map((i) => i.amount))).toEqual([
+      [0.25],
+      [0.25],
+      [],
     ])
   })
 })

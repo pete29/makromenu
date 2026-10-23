@@ -52,21 +52,32 @@ function scaleIngredient(ing: Ingredient, multiplier: number, servings: number):
 }
 
 /**
- * One person's part of the cooked ingredients, for dishes assembled per plate (sandwiches, salads).
+ * Everyone's part of the cooked ingredients, for dishes assembled per plate (sandwiches, salads).
+ * Plates are rounded one by one and the last gets what's left, so together they use up the pot.
  * Pinches are left out: they season the whole pot.
  */
-export function plateIngredients(cook: ScaledIngredient[], share: number): Ingredient[] {
-  return cook
-    .filter((ing) => ing.scaled)
-    .map((ing): Ingredient => {
-      const base = { name: ing.name, ...(ing.group ? { group: ing.group } : {}) }
-      if (ing.amount !== undefined && ing.unit !== undefined) {
-        const amount = roundAmount(ing.amount * share, unitStep(ing.unit))
-        const grams = Math.round((ing.grams / ing.amount) * amount * 100) / 100
-        return { ...base, grams, amount, unit: ing.unit }
-      }
-      return { ...base, grams: roundGrams(ing.grams * share) }
+export function splitIntoPlates(cook: ScaledIngredient[], shares: number[]): Ingredient[][] {
+  const plates: Ingredient[][] = shares.map(() => [])
+  for (const ing of cook.filter((i) => i.scaled)) {
+    const base = { name: ing.name, ...(ing.group ? { group: ing.group } : {}) }
+    const counted = ing.amount !== undefined && ing.unit !== undefined
+    // Pieces/spoons when the ingredient has a household unit, grams otherwise.
+    const total = counted ? ing.amount! : ing.grams
+    let left = total
+    shares.forEach((share, i) => {
+      const last = i === shares.length - 1
+      const raw = last ? left : counted ? roundAmount(total * share, unitStep(ing.unit!)) : roundGrams(total * share)
+      const part = Math.max(0, Math.min(left, Math.round(raw * 100) / 100))
+      left -= part
+      if (part === 0) return
+      plates[i].push(
+        counted
+          ? { ...base, amount: part, unit: ing.unit, grams: Math.round((ing.grams / ing.amount!) * part * 100) / 100 }
+          : { ...base, grams: part },
+      )
     })
+  }
+  return plates
 }
 
 const scaleMacros =(m: Macros, f: number): Macros => ({

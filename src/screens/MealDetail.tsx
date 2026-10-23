@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { PortionedMeal } from '../engine/plan'
-import { plateIngredients } from '../engine/scaling'
+import { splitIntoPlates } from '../engine/scaling'
 import { IngredientList } from './IngredientList'
 import { Steps } from './Steps'
 
@@ -63,7 +63,7 @@ export function MealDetail({ portions, names, title, onBack }: Props) {
             Najprościej zważyć gotowe danie i nałożyć {Math.round(plate.share * 100)}%. Jeśli danie składa się na
             talerzu, porcja to:
           </p>
-          <IngredientList ingredients={plateIngredients(cook, plate.share)} />
+          <IngredientList ingredients={splitIntoPlates(cook, plates.map((p) => p.share))[view]} />
         </>
       ) : (
         <>
