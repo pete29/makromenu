@@ -130,8 +130,9 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 
 ## Phase 6: PWA and deployment
 
-- [ ] Manifest, icons, theme color
-- [ ] Offline support (service worker)
+- [x] Manifest, icons (SVG favicon, Apple 180 px, 192/512 px, maskable), theme color, iOS meta tags
+- [x] Offline support (service worker via vite-plugin-pwa, auto-update on next launch)
+- [x] Ask for persistent storage so the browser doesn't evict the data
 - [ ] Deploy to Vercel or GitHub Pages
 - [ ] Test on iPhone: "Add to Home Screen"
 
