@@ -121,7 +121,7 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
   - [x] manual recipe selection and swapping; the picker sorts recipes by how well they fit the meal's kcal targets and flags poor fits
   - [x] per-meal "who eats it" toggles (extra snack for one person) and kcal per person
   - [x] day totals: kcal / target and macros per person
-  - [ ] auto-fill the week (matching meal type, few repeats, recipes that scale well)
+  - [x] auto-fill the week from today on (matching meal type, few repeats, none on neighbouring days, recipes that scale well), keeping planned meals ([src/engine/autofill.ts](src/engine/autofill.ts)); clear the week
   - [ ] "cook once, eat for 2 days" for multi-serving recipes
 - [x] **Meal view** (tap a meal in the planner, [src/screens/MealDetail.tsx](src/screens/MealDetail.tsx)): "to cook" for the whole pot with steps, and per person: % of the finished dish, kcal/macros and ingredients for a plate assembled separately
   - [ ] plate amounts are rounded per plate, so they may not add up exactly to the pot (e.g. 180 g + 250 g vs 420 g); give the last plate the remainder

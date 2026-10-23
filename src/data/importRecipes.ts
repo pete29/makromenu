@@ -1,7 +1,5 @@
-import type { MealType } from '../engine/profile'
+import { MEAL_TYPES } from '../engine/profile'
 import type { Ingredient, Recipe } from '../engine/types'
-
-const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'snack', 'dinner']
 
 // Messages are shown in the app, hence Polish.
 export class ImportError extends Error {}

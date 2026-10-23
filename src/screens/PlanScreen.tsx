@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { db, type StoredMeal } from '../data/db'
+import { autofillDays } from '../engine/autofill'
 import { mealTargets, portionDay, type PortionedMeal } from '../engine/plan'
 import type { MealType, Profile } from '../engine/profile'
 import type { Macros, Recipe } from '../engine/types'
@@ -23,6 +24,7 @@ export function PlanScreen() {
   const [day, setDay] = useState(today)
   const [picker, setPicker] = useState<PickerState | null>(null)
   const [openMealId, setOpenMealId] = useState<number | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   const days = weekDays(startOfWeek(day))
   const weekMeals = useLiveQuery(
@@ -50,6 +52,22 @@ export function PlanScreen() {
     if (picker.meal) await db.mealPlan.update(picker.meal.id, { recipeId })
     else await db.mealPlan.add({ date: day, type: picker.type, recipeId, profileIds: defaultEaters(picker.type) } as StoredMeal)
     setPicker(null)
+  }
+
+  // Only from today on: past days are history, not plans.
+  const upcomingDays = days.filter((d) => d >= today)
+
+  async function fillWeek() {
+    // All of the week's meals count as taken slots, also ones whose recipe was removed.
+    const added = autofillDays([...recipes!.values()], profiles!, upcomingDays, weekMeals!)
+    await db.mealPlan.bulkAdd(added as StoredMeal[])
+    setNotice(added.length > 0 ? `Dodano posiłków: ${added.length}.` : 'Wszystkie posiłki są już zaplanowane.')
+  }
+
+  async function clearWeek() {
+    if (!confirm(`Usunąć wszystkie posiłki z tygodnia ${dayMonth(days[0])}–${dayMonth(days[6])}?`)) return
+    await db.mealPlan.bulkDelete(weekMeals!.map((m) => m.id))
+    setNotice(null)
   }
 
   async function toggleEater(meal: StoredMeal, profileId: string) {
@@ -131,6 +149,24 @@ export function PlanScreen() {
           )
         })}
       </ol>
+
+      <div className="mt-3 flex items-center gap-4 text-sm font-medium">
+        {upcomingDays.length > 0 && (
+          <button onClick={fillWeek} className="text-emerald-700 dark:text-emerald-400">
+            Uzupełnij tydzień
+          </button>
+        )}
+        {weekMeals.length > 0 && (
+          <button onClick={clearWeek} className="text-red-700 dark:text-red-400">
+            Wyczyść tydzień
+          </button>
+        )}
+      </div>
+      {notice && (
+        <p role="status" className="mt-1 text-sm text-stone-500">
+          {notice}
+        </p>
+      )}
 
       <DayTotals profiles={profiles} totals={summary.totals} empty={planned.length === 0} />
 

@@ -1,5 +1,8 @@
 export type MealType = 'breakfast' | 'lunch' | 'snack' | 'dinner'
 
+/** Meal types in the order of the day. */
+export const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'snack', 'dinner']
+
 export interface MealSlot {
   type: MealType
   /** Relative part of the daily calories; shares don't have to add up to 1. */
