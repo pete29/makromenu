@@ -100,8 +100,8 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 - [x] Portions for two people from one recipe: one pot "to cook" for the sum of portions + each person's share and kcal/macros "per plate"
 - [x] Polish unit inflection: 1 sztuka, 2 sztuki, 5 sztuk, 1.5 sztuki ([src/engine/units.ts](src/engine/units.ts))
 - [x] Daily summary: kcal and macros per person
-- [~] Shopping list: sum of weights over the selected meals for both people, merged by name, household units summed when they match, water skipped
-  - [ ] grouped by store section (needs Phase 2)
+- [x] Shopping list: sum of weights over the selected meals for both people, merged by name, household units summed when they match, water and ice skipped
+  - [~] grouped by store section: keyword rules for now ([src/engine/sections.ts](src/engine/sections.ts)), per-product section with Phase 2
 - [~] Unit tests (Vitest), on made-up sample recipes (`npm test`)
 
 ## Phase 4: App data layer
@@ -125,7 +125,7 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
   - [ ] "cook once, eat for 2 days" for multi-serving recipes
 - [x] **Meal view** (tap a meal in the planner, [src/screens/MealDetail.tsx](src/screens/MealDetail.tsx)): "to cook" for the whole pot with steps, and per person: % of the finished dish, kcal/macros and ingredients for a plate assembled separately
   - [ ] plate amounts are rounded per plate, so they may not add up exactly to the pot (e.g. 180 g + 250 g vs 420 g); give the last plate the remainder
-- [ ] **Shopping list:** pick a range of days, weights by section, check-off
+- [x] **Shopping list** ([src/screens/ShoppingScreen.tsx](src/screens/ShoppingScreen.tsx)): range presets or custom dates, items grouped by store section, kitchen measures shown as grams, check-off saved on the device
 - [ ] Shopping list: conversion to packages (later)
 
 ## Phase 6: PWA and deployment

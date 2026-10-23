@@ -103,6 +103,16 @@ describe('shoppingList', () => {
     ])
   })
 
+  it('shows kitchen measures as grams only, rounded to whole grams', () => {
+    const syrup = recipe('syrop', 450, [
+      { name: 'Miód', grams: 7.5, amount: 0.5, unit: 'łyżki' },
+      { name: 'Lód, kostki', grams: 60, amount: 2, unit: 'sztuki' },
+    ])
+    const list = shoppingList(new Map([['syrop', syrup]]), profiles, [meal('d1', 'breakfast', 'syrop', ['ola'])])
+    // 7.5 g × 1 → 7.5 g → 8 g, no "0.5 łyżki"; ice isn't bought
+    expect(list).toEqual([{ name: 'Miód', grams: 8 }])
+  })
+
   it('keeps the household measure when all uses share a unit', () => {
     const plan = [meal('d1', 'snack', 'jogurt', ['ola']), meal('d1', 'snack', 'jogurt', ['ola'])]
     // Two snacks: 1500 × 10 / 110 = 136 kcal each → 0.91× → rounded to 1 pack each

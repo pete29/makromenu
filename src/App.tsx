@@ -3,6 +3,7 @@ import { RecipeDetail } from './screens/RecipeDetail'
 import { PlanScreen } from './screens/PlanScreen'
 import { RecipesScreen } from './screens/RecipesScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
+import { ShoppingScreen } from './screens/ShoppingScreen'
 
 type Tab = 'plan' | 'recipes' | 'shopping' | 'settings'
 
@@ -13,14 +14,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'settings', label: 'Ustawienia' },
 ]
 
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-      <p className="mt-2 text-stone-500">Wkrótce.</p>
-    </div>
-  )
-}
 
 function App() {
   const [tab, setTab] = useState<Tab>('plan')
@@ -36,7 +29,7 @@ function App() {
           ) : (
             <RecipesScreen onOpen={setRecipeId} />
           ))}
-        {tab === 'shopping' && <ComingSoon title="Zakupy" />}
+        {tab === 'shopping' && <ShoppingScreen />}
         {tab === 'settings' && <SettingsScreen />}
       </main>
 

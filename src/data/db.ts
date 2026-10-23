@@ -13,16 +13,25 @@ export interface StoredMeal extends PlannedMeal {
   id: number
 }
 
+/** A ticked-off item on the shopping list, by product name. */
+export interface ShoppingCheck {
+  name: string
+}
+
 export const db = new Dexie('makromenu') as Dexie & {
   recipes: EntityTable<StoredRecipe, 'id'>
   profiles: EntityTable<Profile, 'id'>
   mealPlan: EntityTable<StoredMeal, 'id'>
+  shoppingChecks: EntityTable<ShoppingCheck, 'name'>
 }
 
 db.version(1).stores({
   recipes: 'id, name',
   profiles: 'id',
   mealPlan: '++id, date',
+})
+db.version(2).stores({
+  shoppingChecks: 'name',
 })
 
 /** Replaces the bundled samples with imported recipes; recipes with the same id are updated. */

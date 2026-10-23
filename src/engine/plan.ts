@@ -32,7 +32,10 @@ export interface ShoppingItem {
 }
 
 /** Not bought in a shop. */
-const NOT_SHOPPED = new Set(['Woda'])
+const NOT_SHOPPED = new Set(['Woda', 'Lód, kostki'])
+
+/** Kitchen measures: nobody buys "10.5 tablespoons" of cream, so the list shows grams only. */
+const MEASURES = new Set(['łyżka', 'łyżeczka', 'szklanka', 'garść', 'filiżanka'])
 
 const weightOf = (profile: Profile, type: MealType) =>
   profile.meals.find((m) => m.type === type)?.share ?? 0
@@ -111,15 +114,17 @@ export function shoppingList(recipes: Map<string, Recipe>, profiles: Profile[], 
     for (const { cook } of portionDay(recipes, profiles, dayMeals).meals) {
       for (const ing of cook) {
         if (NOT_SHOPPED.has(ing.name)) continue
-        const unit = ing.unit && baseUnit(ing.unit)
+        const base = ing.unit && baseUnit(ing.unit)
+        const unit = base && !MEASURES.has(base) ? base : undefined
+        const amount = unit ? ing.amount : undefined
         const item = items.get(ing.name)
         if (!item) {
-          items.set(ing.name, { name: ing.name, grams: ing.grams, amount: ing.amount, unit })
+          items.set(ing.name, { name: ing.name, grams: ing.grams, amount, unit })
           continue
         }
         item.grams += ing.grams
         if (!item.mixedUnits && unit && unit === item.unit && item.amount !== undefined) {
-          item.amount += ing.amount!
+          item.amount += amount!
         } else {
           item.mixedUnits = true
         }
@@ -130,7 +135,8 @@ export function shoppingList(recipes: Map<string, Recipe>, profiles: Profile[], 
   return [...items.values()]
     .map(({ mixedUnits, amount, unit, ...item }) => ({
       ...item,
-      grams: Math.round(item.grams * 100) / 100,
+      // Pinches stay precise (0.75 g of pepper), everything else is whole grams.
+      grams: item.grams < 1 ? Math.round(item.grams * 100) / 100 : Math.round(item.grams),
       ...(!mixedUnits && amount !== undefined ? { amount, unit } : {}),
     }))
     .sort((a, b) => a.name.localeCompare(b.name, 'pl'))
