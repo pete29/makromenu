@@ -68,8 +68,8 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
   - [x] ingredients embedded in the middle of a step in the PDF (moved to ingredients with a warning)
   - [x] group header split across two lines ("Do" / "podania")
   - [x] zero parser warnings
-- [ ] Private data in `data/recipes.local.json` (outside git)
-- [ ] A few sample recipes in the repo so the demo works without private data
+- [x] Private data in `data/private/recipes.json` (outside git), imported into the app from Settings
+- [x] A few sample recipes in the repo so the demo works without private data ([src/data/samples.json](src/data/samples.json), made up, not from the PDF)
 - [ ] Assign meal types based on the dish, not the PDF section (a recipe can have several types, e.g. soup = lunch or dinner)
 - [ ] Manual review of the output
 
@@ -105,14 +105,15 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 
 ## Phase 4: App data layer
 
-- [ ] Dexie schema: `ingredients`, `recipes`, `profiles`, `mealPlan`, `shoppingChecks`
-- [ ] Import recipes and ingredients from JSON on first launch
+- [~] Dexie schema ([src/data/db.ts](src/data/db.ts)): `recipes`, `profiles`, `mealPlan` done; `ingredients`, `shoppingChecks` later
+- [x] Sample recipes and two 1500 kcal profiles seeded on first launch
+- [x] Recipe import from a JSON file picked in Settings, validated with readable errors; replaces the samples
 - [ ] Backup export/import to a file
 
 ## Phase 5: User interface
 
-- [ ] Mobile layout + bottom navigation
-- [ ] **Recipes:** list, search, filter by meal type, recipe details
+- [x] Mobile layout + bottom navigation (safe-area aware)
+- [~] **Recipes:** list, search by name or ingredient (diacritics-insensitive), recipe details; filter by meal type after meal types are assigned
 - [ ] **Settings:** profiles (name, kcal, number of meals, % split)
 - [ ] **Weekly planner:**
   - [ ] days × meals grid

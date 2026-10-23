@@ -1,0 +1,94 @@
+[
+  {
+    "id": "owsianka-z-bananem-i-maslem-orzechowym",
+    "name": "Owsianka z bananem i masłem orzechowym",
+    "kcal": 475,
+    "protein": 18,
+    "carbs": 69,
+    "fat": 14,
+    "timeMin": 10,
+    "servings": 1,
+    "ingredients": [
+      { "name": "Płatki owsiane", "grams": 50 },
+      { "name": "Mleko 1,5%", "grams": 200, "amount": 0.75, "unit": "szklanki" },
+      { "name": "Banan", "grams": 120, "amount": 1, "unit": "sztuka" },
+      { "name": "Masło orzechowe", "grams": 15, "amount": 1, "unit": "łyżka" },
+      { "name": "Cynamon mielony", "grams": 0.5, "amount": 1, "unit": "szczypta" }
+    ],
+    "steps": [
+      "Płatki zalewamy mlekiem i gotujemy na małym ogniu przez około 5 minut, często mieszając.",
+      "Banana kroimy w plastry.",
+      "Owsiankę przekładamy do miski, dodajemy banana i masło orzechowe, posypujemy cynamonem."
+    ]
+  },
+  {
+    "id": "kurczak-z-ryzem-i-brokulem",
+    "name": "Kurczak z ryżem i brokułem",
+    "kcal": 465,
+    "protein": 42,
+    "carbs": 56,
+    "fat": 8,
+    "timeMin": 30,
+    "servings": 1,
+    "ingredients": [
+      { "name": "Mięso z piersi kurczaka", "grams": 150 },
+      { "name": "Ryż basmati", "grams": 60 },
+      { "name": "Brokuł, świeży lub mrożony", "grams": 150 },
+      { "name": "Oliwa z oliwek", "grams": 5, "amount": 1, "unit": "łyżeczka" },
+      { "name": "Czosnek świeży", "grams": 5, "amount": 1, "unit": "ząbek" },
+      { "name": "Sos sojowy", "grams": 10, "amount": 1, "unit": "łyżka" },
+      { "name": "Sól", "grams": 0.25, "amount": 1, "unit": "szczypta" },
+      { "name": "Pieprz czarny", "grams": 0.25, "amount": 1, "unit": "szczypta" }
+    ],
+    "steps": [
+      "Ryż gotujemy zgodnie z instrukcją na opakowaniu.",
+      "Brokuła dzielimy na różyczki i gotujemy na parze przez 6–8 minut.",
+      "Kurczaka kroimy w kostkę, doprawiamy solą i pieprzem, smażymy na oliwie z posiekanym czosnkiem przez około 8 minut.",
+      "Pod koniec smażenia dodajemy sos sojowy. Podajemy z ryżem i brokułem."
+    ]
+  },
+  {
+    "id": "zupa-krem-z-dyni",
+    "name": "Zupa krem z dyni",
+    "kcal": 330,
+    "protein": 9,
+    "carbs": 38,
+    "fat": 16,
+    "timeMin": 40,
+    "servings": 2,
+    "ingredients": [
+      { "name": "Dynia", "grams": 600 },
+      { "name": "Ziemniaki", "grams": 150, "amount": 2, "unit": "sztuki" },
+      { "name": "Cebula", "grams": 80, "amount": 1, "unit": "sztuka" },
+      { "name": "Bulion warzywny", "grams": 750, "amount": 3, "unit": "szklanki" },
+      { "name": "Oliwa z oliwek", "grams": 10, "amount": 1, "unit": "łyżka" },
+      { "name": "Mleczko kokosowe 12%", "grams": 80, "amount": 4, "unit": "łyżki" },
+      { "name": "Pestki dyni", "grams": 20, "amount": 2, "unit": "łyżki" },
+      { "name": "Sól", "grams": 0.5, "amount": 2, "unit": "szczypty" }
+    ],
+    "steps": [
+      "Dynię i ziemniaki obieramy i kroimy w kostkę, cebulę siekamy.",
+      "Cebulę podsmażamy na oliwie, dodajemy dynię i ziemniaki, zalewamy bulionem.",
+      "Gotujemy pod przykryciem około 20 minut, aż warzywa będą miękkie.",
+      "Dodajemy mleczko kokosowe, solimy i blendujemy na gładki krem.",
+      "Podajemy posypane pestkami dyni."
+    ]
+  },
+  {
+    "id": "skyr-z-borowkami-i-orzechami",
+    "name": "Skyr z borówkami i orzechami",
+    "kcal": 225,
+    "protein": 19,
+    "carbs": 22,
+    "fat": 7,
+    "timeMin": 5,
+    "servings": 1,
+    "ingredients": [
+      { "name": "Jogurt skyr", "grams": 150, "amount": 1, "unit": "opakowanie" },
+      { "name": "Borówki", "grams": 80 },
+      { "name": "Orzechy włoskie", "grams": 10 },
+      { "name": "Miód", "grams": 6, "amount": 1, "unit": "łyżeczka" }
+    ],
+    "steps": ["Skyr przekładamy do miseczki, dodajemy borówki i posiekane orzechy, polewamy miodem."]
+  }
+]
