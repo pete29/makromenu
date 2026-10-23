@@ -70,7 +70,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
   - [x] zero parser warnings
 - [x] Private data in `data/private/recipes.json` (outside git), imported into the app from Settings
 - [x] A few sample recipes in the repo so the demo works without private data ([src/data/samples.json](src/data/samples.json), made up, not from the PDF)
-- [ ] Assign meal types based on the dish, not the PDF section (a recipe can have several types, e.g. soup = lunch or dinner)
+- [x] Assign meal types based on the dish, not the PDF section (a recipe can have several types, e.g. soup = lunch or dinner): guessed from kcal and name ([src/engine/mealTypes.ts](src/engine/mealTypes.ts)), corrected by hand in the recipe view; manual types survive re-import
 - [ ] Manual review of the output
 
 ## Phase 2: Ingredient database
@@ -114,7 +114,7 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 ## Phase 5: User interface
 
 - [x] Mobile layout + bottom navigation (safe-area aware)
-- [~] **Recipes:** list, search by name or ingredient (diacritics-insensitive), recipe details; filter by meal type after meal types are assigned
+- [x] **Recipes:** list, search by name or ingredient (diacritics-insensitive), filter by meal type, recipe details with editable meal types
 - [x] **Settings:** profiles (name, daily kcal, % split per meal with kcal preview; 0% = doesn't eat that meal), saved as you type
 - [~] **Weekly planner** ([src/screens/PlanScreen.tsx](src/screens/PlanScreen.tsx)):
   - [x] week navigation + day strip, meals of the selected day by type

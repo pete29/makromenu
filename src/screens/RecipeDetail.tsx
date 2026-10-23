@@ -1,5 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../data/db'
+import { mealTypesOf } from '../engine/mealTypes'
+import type { MealType } from '../engine/profile'
+import { MEAL_LABELS, MEAL_TYPES } from '../ui/labels'
+import { Chip } from './Chip'
 import { IngredientList } from './IngredientList'
 import { Steps } from './Steps'
 
@@ -10,6 +14,14 @@ interface Props {
 
 export function RecipeDetail({ id, onBack }: Props) {
   const recipe = useLiveQuery(() => db.recipes.get(id), [id])
+
+  function toggleType(type: MealType) {
+    if (!recipe) return
+    const current = mealTypesOf(recipe)
+    const next = current.includes(type) ? current.filter((t) => t !== type) : [...current, type]
+    if (next.length === 0) return // a recipe has to fit somewhere
+    db.recipes.update(id, { mealTypes: MEAL_TYPES.filter((t) => next.includes(t)) })
+  }
 
   return (
     <div>
@@ -37,6 +49,30 @@ export function RecipeDetail({ id, onBack }: Props) {
               ? `Wartości na 1 porcję, składniki na cały przepis (${recipe.servings} porcje).`
               : 'Wartości na 1 porcję.'}
             {recipe.timeMin && ` Czas: ${recipe.timeMin} min.`}
+          </p>
+
+          <h2 className="mt-6 text-lg font-semibold">Pasuje na</h2>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {MEAL_TYPES.map((type) => (
+              <Chip key={type} pressed={mealTypesOf(recipe).includes(type)} onClick={() => toggleType(type)}>
+                {MEAL_LABELS[type]}
+              </Chip>
+            ))}
+          </div>
+          <p className="mt-2 text-sm text-stone-500">
+            {recipe.mealTypes ? (
+              <>
+                Ustawione ręcznie.{' '}
+                <button
+                  onClick={() => db.recipes.update(id, { mealTypes: undefined })}
+                  className="text-emerald-700 dark:text-emerald-400"
+                >
+                  Przywróć automatyczne
+                </button>
+              </>
+            ) : (
+              'Dobrane automatycznie po kaloriach i nazwie. Kliknij, żeby poprawić.'
+            )}
           </p>
 
           <h2 className="mt-6 text-lg font-semibold">Składniki</h2>

@@ -1,3 +1,5 @@
+import type { MealType } from './profile'
+
 export interface Macros {
   kcal: number
   protein: number
@@ -24,4 +26,6 @@ export interface Recipe extends Macros {
   servings: number
   ingredients: Ingredient[]
   steps: string[]
+  /** Meals the recipe fits, set by hand; guessed when absent (see mealTypes.ts). */
+  mealTypes?: MealType[]
 }

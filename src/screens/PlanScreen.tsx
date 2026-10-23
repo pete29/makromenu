@@ -5,11 +5,9 @@ import { mealTargets, portionDay, type PortionedMeal } from '../engine/plan'
 import type { MealType, Profile } from '../engine/profile'
 import type { Macros, Recipe } from '../engine/types'
 import { addDays, dayMonth, startOfWeek, toISODate, weekDays, weekdayShort } from '../ui/dates'
-import { MEAL_LABELS } from '../ui/labels'
+import { MEAL_LABELS, MEAL_TYPES } from '../ui/labels'
 import { MealDetail } from './MealDetail'
 import { RecipePicker } from './RecipePicker'
-
-const MEAL_ORDER = Object.keys(MEAL_LABELS) as MealType[]
 
 interface PickerState {
   type: MealType
@@ -18,7 +16,7 @@ interface PickerState {
 }
 
 const byMealOrder = (a: StoredMeal, b: StoredMeal) =>
-  MEAL_ORDER.indexOf(a.type) - MEAL_ORDER.indexOf(b.type) || a.id - b.id
+  MEAL_TYPES.indexOf(a.type) - MEAL_TYPES.indexOf(b.type) || a.id - b.id
 
 export function PlanScreen() {
   const today = toISODate(new Date())
@@ -85,6 +83,7 @@ export function PlanScreen() {
     return (
       <RecipePicker
         title={`${MEAL_LABELS[picker.type]} · ${weekdayShort(day)} ${dayMonth(day)}`}
+        mealType={picker.type}
         recipes={[...recipes.values()]}
         targets={targets}
         names={eaters.map(nameOf)}
@@ -135,7 +134,7 @@ export function PlanScreen() {
 
       <DayTotals profiles={profiles} totals={summary.totals} empty={planned.length === 0} />
 
-      {MEAL_ORDER.map((type) => {
+      {MEAL_TYPES.map((type) => {
         const ofType = dayMeals.filter((m) => m.type === type)
         return (
           <section key={type} className="mt-5">

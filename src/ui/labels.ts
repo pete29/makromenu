@@ -6,3 +6,6 @@ export const MEAL_LABELS: Record<MealType, string> = {
   snack: 'Przekąska',
   dinner: 'Kolacja',
 }
+
+/** Meal types in the order of the day. */
+export const MEAL_TYPES = Object.keys(MEAL_LABELS) as MealType[]

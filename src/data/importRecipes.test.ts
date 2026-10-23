@@ -26,6 +26,11 @@ describe('parseRecipesJson', () => {
     expect(parseRecipesJson(JSON.stringify([input]))).toEqual([{ ...valid, servings: 1 }])
   })
 
+  it('keeps known meal types only', () => {
+    const [r] = parseRecipesJson(JSON.stringify([{ ...valid, mealTypes: ['dinner', 'brunch', 'breakfast'] }]))
+    expect(r.mealTypes).toEqual(['breakfast', 'dinner'])
+  })
+
   it('rejects broken files with a readable message', () => {
     expect(() => parseRecipesJson('{oops')).toThrow('To nie jest poprawny plik JSON')
     expect(parse({ recipes: [] })).toThrow('Plik nie zawiera listy przepisów')

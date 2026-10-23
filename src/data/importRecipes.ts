@@ -1,4 +1,7 @@
+import type { MealType } from '../engine/profile'
 import type { Ingredient, Recipe } from '../engine/types'
+
+const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'snack', 'dinner']
 
 // Messages are shown in the app, hence Polish.
 export class ImportError extends Error {}
@@ -26,6 +29,8 @@ function parseRecipe(v: unknown, index: number): Recipe {
   }
   if (r.kcal === 0) throw new ImportError(`${where}: kcal nie może wynosić 0`)
   if (!Array.isArray(r.ingredients) || r.ingredients.length === 0) throw new ImportError(`${where}: brak składników`)
+  // Unknown types are dropped; with none left the app guesses them.
+  const mealTypes = Array.isArray(r.mealTypes) ? MEAL_TYPES.filter((t) => (r.mealTypes as unknown[]).includes(t)) : []
   return {
     id: r.id,
     name: r.name,
@@ -37,6 +42,7 @@ function parseRecipe(v: unknown, index: number): Recipe {
     ...(isNum(r.timeMin) ? { timeMin: r.timeMin } : {}),
     ingredients: r.ingredients.map((i) => parseIngredient(i, where)),
     steps: Array.isArray(r.steps) ? r.steps.filter(isStr) : [],
+    ...(mealTypes.length > 0 ? { mealTypes } : {}),
   }
 }
 

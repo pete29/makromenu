@@ -34,11 +34,20 @@ db.version(2).stores({
   shoppingChecks: 'name',
 })
 
-/** Replaces the bundled samples with imported recipes; recipes with the same id are updated. */
+/**
+ * Replaces the bundled samples with imported recipes; recipes with the same id are updated, but
+ * meal types set by hand in the app are kept unless the file has its own.
+ */
 export async function saveImportedRecipes(recipes: Recipe[]): Promise<void> {
   await db.transaction('rw', db.recipes, async () => {
     await db.recipes.filter((r) => r.sample === true).delete()
-    await db.recipes.bulkPut(recipes)
+    const existing = await db.recipes.bulkGet(recipes.map((r) => r.id))
+    await db.recipes.bulkPut(
+      recipes.map((r, i) => {
+        const kept = existing[i]?.mealTypes
+        return r.mealTypes || !kept ? r : { ...r, mealTypes: kept }
+      }),
+    )
   })
 }
 
