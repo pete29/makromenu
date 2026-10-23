@@ -80,6 +80,13 @@ function splitColumns(line, rightCol, leftIndent) {
 const ING_RE =
   /(?<name>[^–|]+?)\s+–\s+(?:(?<g1>\d+(?:[.,]\d+)?)\s*(?:g|ml)(?![\p{L}(])|(?<amt>\d+(?:[.,]\d+)?)\s+(?:x\s+)?(?<unit>[^()|–]+?)\s*\((?<g2>\d+(?:[.,]\d+)?)\s*(?:g|ml)\))/guy
 
+// Różne nazwy tego samego produktu w PDF-ie. Scalamy tylko to, co ma te same wartości odżywcze,
+// więc np. majonez i majonez light zostają osobno.
+const ALIASES = {
+  'Bób świeży': 'Bób świeży lub mrożony',
+  'Śmietanka 12%': 'Śmietana 12%',
+}
+
 function parseIngredients(text, warnings, title) {
   const out = []
   let group = null
@@ -97,8 +104,9 @@ function parseIngredients(text, warnings, title) {
     let m
     while ((m = ING_RE.exec(c))) {
       const g = m.groups
+      const name = g.name.trim()
       out.push({
-        name: g.name.trim(),
+        name: ALIASES[name] ?? name,
         grams: num(g.g1 ?? g.g2),
         ...(g.amt ? { amount: num(g.amt), unit: g.unit.trim() } : {}),
         ...(group ? { group } : {}),
@@ -159,7 +167,11 @@ for (let r = 0; r < metaIdx.length; r++) {
   }
 
   const { stray, rest: stepText } = extractStrayIngredients(right.join(' ').replace(/\s+/g, ' '), warnings, title)
-  const ingredientText = `${left.join(' ')} ${stray}`.replace(/\s+/g, ' ').trim()
+  // "Woda – 1 łyżka (15 g) Do" / "podania": nagłówek grupy rozbity na dwie linie.
+  const ingredientText = `${left.join(' ')} ${stray}`
+    .replace(/\s+/g, ' ')
+    .replace(/(?<=\)|\d g) Do podania /g, ' |SEC:DO PODANIA| ')
+    .trim()
   recipes.push({
     id: title
       .toLowerCase()
