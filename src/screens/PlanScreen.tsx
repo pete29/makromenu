@@ -6,6 +6,7 @@ import type { MealType, Profile } from '../engine/profile'
 import type { Macros, Recipe } from '../engine/types'
 import { addDays, dayMonth, startOfWeek, toISODate, weekDays, weekdayShort } from '../ui/dates'
 import { MEAL_LABELS } from '../ui/labels'
+import { MealDetail } from './MealDetail'
 import { RecipePicker } from './RecipePicker'
 
 const MEAL_ORDER = Object.keys(MEAL_LABELS) as MealType[]
@@ -23,6 +24,7 @@ export function PlanScreen() {
   const today = toISODate(new Date())
   const [day, setDay] = useState(today)
   const [picker, setPicker] = useState<PickerState | null>(null)
+  const [openMealId, setOpenMealId] = useState<number | null>(null)
 
   const days = weekDays(startOfWeek(day))
   const weekMeals = useLiveQuery(
@@ -54,6 +56,19 @@ export function PlanScreen() {
       ? meal.profileIds.filter((id) => id !== profileId)
       : profiles!.map((p) => p.id).filter((id) => id === profileId || meal.profileIds.includes(id))
     await db.mealPlan.update(meal.id, { profileIds })
+  }
+
+  const openPortions = openMealId !== null ? portionsById.get(openMealId) : undefined
+  if (openPortions) {
+    const { meal } = openPortions
+    return (
+      <MealDetail
+        portions={openPortions}
+        names={meal.profileIds.map(nameOf)}
+        title={`${MEAL_LABELS[meal.type]} · ${weekdayShort(meal.date)} ${dayMonth(meal.date)}`}
+        onBack={() => setOpenMealId(null)}
+      />
+    )
   }
 
   if (picker) {
@@ -127,6 +142,7 @@ export function PlanScreen() {
                 recipe={recipes.get(meal.recipeId)}
                 portions={portionsById.get(meal.id)}
                 profiles={profiles}
+                onOpen={() => setOpenMealId(meal.id)}
                 onChange={() => setPicker({ type, meal })}
                 onRemove={() => db.mealPlan.delete(meal.id)}
                 onToggleEater={(id) => toggleEater(meal, id)}
@@ -177,15 +193,25 @@ interface MealCardProps {
   recipe?: Recipe
   portions?: PortionedMeal
   profiles: Profile[]
+  onOpen: () => void
   onChange: () => void
   onRemove: () => void
   onToggleEater: (profileId: string) => void
 }
 
-function MealCard({ meal, recipe, portions, profiles, onChange, onRemove, onToggleEater }: MealCardProps) {
+function MealCard({ meal, recipe, portions, profiles, onOpen, onChange, onRemove, onToggleEater }: MealCardProps) {
   return (
     <div className="mt-2 rounded-xl bg-white p-3 dark:bg-stone-800">
-      <div className="font-medium">{recipe?.name ?? 'Przepis usunięty'}</div>
+      {recipe ? (
+        <button onClick={onOpen} className="flex w-full items-start justify-between gap-2 text-left font-medium">
+          {recipe.name}
+          <span className="text-stone-400" aria-hidden>
+            ›
+          </span>
+        </button>
+      ) : (
+        <div className="font-medium">Przepis usunięty</div>
+      )}
       <div className="mt-2 flex flex-wrap gap-1.5">
         {profiles.map((p) => {
           const index = meal.profileIds.indexOf(p.id)

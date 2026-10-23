@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { portionMeal, roundAmount, roundGrams } from './scaling'
+import { plateIngredients, portionMeal, roundAmount, roundGrams } from './scaling'
 import type { Recipe } from './types'
 
 const omelette: Recipe = {
@@ -65,6 +65,18 @@ describe('portionMeal', () => {
       { name: 'Cebula', grams: 40, amount: 0.5, unit: 'sztuka', scaled: true },
     ])
     expect(plates[0]).toMatchObject({ kcal: 300, factor: 1, share: 1 })
+  })
+})
+
+describe('plateIngredients', () => {
+  it('gives each person their share of the pot, without pinches', () => {
+    const { cook, plates } = portionMeal(omelette, [400, 600])
+    expect(plateIngredients(cook, plates[0].share)).toEqual([
+      { name: 'Jajko kurze całe', grams: 112, amount: 2, unit: 'sztuki' },
+      { name: 'Szynka z indyka', grams: 30 },
+      { name: 'Masło extra', grams: 5, amount: 1, unit: 'łyżeczka' },
+      { name: 'Szczypiorek siekany', grams: 6 },
+    ])
   })
 })
 
