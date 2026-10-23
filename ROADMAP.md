@@ -109,7 +109,7 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 - [~] Dexie schema ([src/data/db.ts](src/data/db.ts)): `recipes`, `profiles`, `mealPlan` done; `ingredients`, `shoppingChecks` later
 - [x] Sample recipes and two 1500 kcal profiles seeded on first launch
 - [x] Recipe import from a JSON file picked in Settings, validated with readable errors; replaces the samples
-- [ ] Backup export/import to a file
+- [x] Backup export/import to a file (Settings): recipes, profiles, plan and shopping checks; restore validates the file, asks to confirm and reloads the app ([src/data/backup.ts](src/data/backup.ts))
 
 ## Phase 5: User interface
 

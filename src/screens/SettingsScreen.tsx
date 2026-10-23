@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useState, type ChangeEvent } from 'react'
 import { db, saveImportedRecipes } from '../data/db'
 import { ImportError, parseRecipesJson } from '../data/importRecipes'
+import { BackupSection } from './BackupSection'
 import { ProfileCard } from './ProfileCard'
 
 type Status = { kind: 'ok' | 'error'; text: string } | null
@@ -64,6 +65,7 @@ export function SettingsScreen() {
           </p>
         )}
       </section>
+      <BackupSection />
     </div>
   )
 }
