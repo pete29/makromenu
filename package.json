@@ -11,8 +11,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "dexie": "^4.0.11",
-    "dexie-react-hooks": "^1.1.7",
+    "dexie": "^4.4.6",
+    "dexie-cloud-addon": "^4.4.15",
+    "dexie-react-hooks": "^4.4.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

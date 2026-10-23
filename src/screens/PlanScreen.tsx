@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { db, type StoredMeal } from '../data/db'
+import { useProfiles, useRecipeMap } from '../data/hooks'
 import { autofillDays } from '../engine/autofill'
 import { mealTargets, portionDay, type PortionedMeal } from '../engine/plan'
 import type { MealType, Profile } from '../engine/profile'
@@ -17,13 +18,13 @@ interface PickerState {
 }
 
 const byMealOrder = (a: StoredMeal, b: StoredMeal) =>
-  MEAL_TYPES.indexOf(a.type) - MEAL_TYPES.indexOf(b.type) || a.id - b.id
+  MEAL_TYPES.indexOf(a.type) - MEAL_TYPES.indexOf(b.type) || a.id.localeCompare(b.id)
 
 export function PlanScreen() {
   const today = toISODate(new Date())
   const [day, setDay] = useState(today)
   const [picker, setPicker] = useState<PickerState | null>(null)
-  const [openMealId, setOpenMealId] = useState<number | null>(null)
+  const [openMealId, setOpenMealId] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
 
   const days = weekDays(startOfWeek(day))
@@ -31,8 +32,8 @@ export function PlanScreen() {
     () => db.mealPlan.where('date').between(days[0], days[6], true, true).toArray(),
     [days[0]],
   )
-  const recipes = useLiveQuery(async () => new Map((await db.recipes.toArray()).map((r) => [r.id, r])), [])
-  const profiles = useLiveQuery(() => db.profiles.toArray(), [])
+  const recipes = useRecipeMap()
+  const profiles = useProfiles()
   if (!weekMeals || !recipes || !profiles) return null
 
   const dayMeals = weekMeals.filter((m) => m.date === day).sort(byMealOrder)

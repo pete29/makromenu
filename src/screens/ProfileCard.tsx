@@ -15,7 +15,13 @@ export function ProfileCard({ profile }: { profile: Profile }) {
   const [kcal, setKcal] = useState(String(profile.dailyKcal))
   const [percents, setPercents] = useState(profile.meals.map((m) => toPercent(m.share)))
 
-  const save = (changes: Partial<Profile>) => db.profiles.update(profile.id, changes)
+  // A default profile isn't stored until its first edit, so this reads the stored one (or the
+  // default) inside the transaction: quick edits of different fields then can't overwrite each other.
+  const save = (change: (current: Profile) => Partial<Profile>) =>
+    db.transaction('rw', db.profiles, async () => {
+      const current = (await db.profiles.get(profile.id)) ?? profile
+      await db.profiles.put({ ...current, ...change(current) })
+    })
 
   const validKcal = (value: string) => {
     const n = Number(value)
@@ -24,7 +30,7 @@ export function ProfileCard({ profile }: { profile: Profile }) {
 
   function onKcal(value: string) {
     setKcal(value)
-    if (validKcal(value)) save({ dailyKcal: Number(value) })
+    if (validKcal(value)) save(() => ({ dailyKcal: Number(value) }))
   }
 
   function onPercent(index: number, value: string) {
@@ -32,7 +38,7 @@ export function ProfileCard({ profile }: { profile: Profile }) {
     setPercents(next)
     const n = Number(value)
     if (value !== '' && Number.isFinite(n) && n >= 0 && n <= 100) {
-      save({ meals: profile.meals.map((m, i) => (i === index ? { ...m, share: n / 100 } : m)) })
+      save((current) => ({ meals: current.meals.map((m, i) => (i === index ? { ...m, share: n / 100 } : m)) }))
     }
   }
 
@@ -47,7 +53,7 @@ export function ProfileCard({ profile }: { profile: Profile }) {
           value={name}
           onChange={(e) => {
             setName(e.target.value)
-            if (e.target.value.trim()) save({ name: e.target.value.trim() })
+            if (e.target.value.trim()) save(() => ({ name: e.target.value.trim() }))
           }}
           className={`mt-1 w-full font-semibold ${inputClass}`}
         />

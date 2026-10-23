@@ -1,6 +1,6 @@
-import { useLiveQuery } from 'dexie-react-hooks'
 import { useState, type ChangeEvent } from 'react'
-import { db, saveImportedRecipes } from '../data/db'
+import { saveImportedRecipes } from '../data/db'
+import { useProfiles, useRecipes } from '../data/hooks'
 import { ImportError, parseRecipesJson } from '../data/importRecipes'
 import { BackupSection } from './BackupSection'
 import { ProfileCard } from './ProfileCard'
@@ -9,8 +9,8 @@ type Status = { kind: 'ok' | 'error'; text: string } | null
 
 export function SettingsScreen() {
   const [status, setStatus] = useState<Status>(null)
-  const recipes = useLiveQuery(() => db.recipes.toArray(), [])
-  const profiles = useLiveQuery(() => db.profiles.toArray(), [])
+  const recipes = useRecipes()
+  const profiles = useProfiles()
   const sampleCount = recipes?.filter((r) => r.sample).length ?? 0
 
   async function onFile(e: ChangeEvent<HTMLInputElement>) {

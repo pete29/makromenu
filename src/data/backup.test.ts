@@ -39,7 +39,7 @@ describe('parseBackup', () => {
     expect(parse({ ...backup, app: 'inna' })).toThrow('To nie jest kopia zapasowa Makromenu')
     expect(parse({ ...backup, version: 2 })).toThrow('Nieobsługiwana wersja')
     expect(parse({ ...backup, profiles: [] })).toThrow('Kopia nie zawiera osób')
-    expect(parse({ ...backup, mealPlan: [{ ...backup.mealPlan[0], recipeId: 'brak' }] })).toThrow('niepoprawny posiłek')
+    expect(parse({ ...backup, mealPlan: [{ ...backup.mealPlan[0], profileIds: ['nikt'] }] })).toThrow('niepoprawny posiłek')
     expect(parse(backup.recipes)).toThrow('To nie jest kopia zapasowa Makromenu')
   })
 })

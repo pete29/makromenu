@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
-import { db } from '../data/db'
+import { db, type ShoppingCheck } from '../data/db'
+import { useProfiles, useRecipeMap } from '../data/hooks'
 import { shoppingList } from '../engine/plan'
 import { SECTIONS, sectionOf } from '../engine/sections'
 import { addDays, dayMonth, startOfWeek, toISODate, weekdayShort } from '../ui/dates'
@@ -16,8 +17,8 @@ export function ShoppingScreen() {
   const [to, setTo] = useState(sunday)
 
   const meals = useLiveQuery(() => db.mealPlan.where('date').between(from, to, true, true).toArray(), [from, to])
-  const recipes = useLiveQuery(async () => new Map((await db.recipes.toArray()).map((r) => [r.id, r])), [])
-  const profiles = useLiveQuery(() => db.profiles.toArray(), [])
+  const recipes = useRecipeMap()
+  const profiles = useProfiles()
   const checks = useLiveQuery(async () => new Set((await db.shoppingChecks.toArray()).map((c) => c.name)), [])
   if (!meals || !recipes || !profiles || !checks) return null
 
@@ -32,7 +33,11 @@ export function ShoppingScreen() {
   })).filter((s) => s.items.length > 0)
   const checkedCount = items.filter((i) => checks.has(i.name)).length
 
-  const toggle = (name: string) => (checks.has(name) ? db.shoppingChecks.delete(name) : db.shoppingChecks.put({ name }))
+  // Two devices can tick the same item offline, so unticking removes every check of that name.
+  const toggle = (name: string) =>
+    checks.has(name)
+      ? db.shoppingChecks.where('name').equals(name).delete()
+      : db.shoppingChecks.add({ name } as ShoppingCheck)
   const setRange = (start: string, end: string) => {
     setFrom(start)
     setTo(end)

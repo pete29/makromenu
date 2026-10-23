@@ -1,5 +1,5 @@
-import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../data/db'
+import { useRecipeMap } from '../data/hooks'
 import { mealTypesOf } from '../engine/mealTypes'
 import type { MealType } from '../engine/profile'
 import { MEAL_LABELS, MEAL_TYPES } from '../ui/labels'
@@ -13,10 +13,11 @@ interface Props {
 }
 
 export function RecipeDetail({ id, onBack }: Props) {
-  const recipe = useLiveQuery(() => db.recipes.get(id), [id])
+  const recipe = useRecipeMap()?.get(id)
 
   function toggleType(type: MealType) {
-    if (!recipe) return
+    // Samples are built into the app, not stored, so there is nothing to save the change to.
+    if (!recipe || recipe.sample) return
     const current = mealTypesOf(recipe)
     const next = current.includes(type) ? current.filter((t) => t !== type) : [...current, type]
     if (next.length === 0) return // a recipe has to fit somewhere
@@ -60,7 +61,9 @@ export function RecipeDetail({ id, onBack }: Props) {
             ))}
           </div>
           <p className="mt-2 text-sm text-stone-500">
-            {recipe.mealTypes ? (
+            {recipe.sample ? (
+              'Przykładowego przepisu nie da się zmienić. Zaimportuj własne przepisy w Ustawieniach.'
+            ) : recipe.mealTypes ? (
               <>
                 Ustawione ręcznie.{' '}
                 <button

@@ -26,6 +26,8 @@ export interface Recipe extends Macros {
   servings: number
   ingredients: Ingredient[]
   steps: string[]
+  /** Stable id from the source file, used to update a recipe when it's imported again. */
+  slug?: string
   /** Meals the recipe fits, set by hand; guessed when absent (see mealTypes.ts). */
   mealTypes?: MealType[]
 }

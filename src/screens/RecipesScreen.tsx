@@ -1,6 +1,5 @@
-import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo, useState } from 'react'
-import { db } from '../data/db'
+import { useRecipes } from '../data/hooks'
 import { mealTypesOf } from '../engine/mealTypes'
 import type { MealType } from '../engine/profile'
 import { searchKey } from '../ui/format'
@@ -14,7 +13,7 @@ interface Props {
 export function RecipesScreen({ onOpen }: Props) {
   const [query, setQuery] = useState('')
   const [type, setType] = useState<MealType | null>(null)
-  const recipes = useLiveQuery(() => db.recipes.toArray(), [])
+  const recipes = useRecipes()
 
   const visible = useMemo(() => {
     const q = searchKey(query.trim())

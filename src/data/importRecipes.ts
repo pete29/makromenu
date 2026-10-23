@@ -41,6 +41,7 @@ function parseRecipe(v: unknown, index: number): Recipe {
     ingredients: r.ingredients.map((i) => parseIngredient(i, where)),
     steps: Array.isArray(r.steps) ? r.steps.filter(isStr) : [],
     ...(mealTypes.length > 0 ? { mealTypes } : {}),
+    ...(isStr(r.slug) ? { slug: r.slug } : {}),
   }
 }
 
