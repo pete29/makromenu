@@ -1,4 +1,6 @@
-// Parsuje tekst wyciągnięty z PDF-a z przepisami (pdftotext -layout) do JSON-a.
+// Parsuje tekst wyciągnięty z PDF-a z przepisami do JSON-a.
+// Tekst: pdftotext -enc UTF-8 -layout Przepisy.pdf przepisy.txt
+//   (bez -enc UTF-8 na Windowsie znikają polskie litery i myślniki „–”)
 // Użycie: node scripts/import-pdf.mjs <przepisy.txt> <wyjście.json>
 
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -13,6 +15,19 @@ const lines = readFileSync(inPath, 'utf8')
   .replace(/\f/g, '\n')
   .split(/\r?\n/)
   .map((l) => l.replace(/^brak zdjęcia/, '            '))
+
+// "Rosół   B 34 g  W 51 g  T 21 g …" + niżej "512 kcal": składamy w układ jak w reszcie
+// przepisów, czyli tytuł, a pod nim linia z kcal i makro.
+for (let i = 0; i < lines.length; i++) {
+  const kcal = lines[i].match(/^\s*(\d+) kcal\s*$/)
+  if (!kcal) continue
+  let p = i - 1
+  while (p >= 0 && lines[p].trim() === '') p--
+  const head = p >= 0 && lines[p].match(/^(\s*)(.+?)\s{2,}(B \d.*)$/)
+  if (!head) continue
+  lines[p] = head[1] + head[2]
+  lines[i] = `${head[1]}${kcal[1]} kcal  ${head[3]}`
+}
 
 const num = (s) => Number(String(s).replace(',', '.'))
 const indentOf = (l) => l.match(/^ */)[0].length
@@ -50,13 +65,15 @@ function readTitle(k) {
 function splitColumns(line, rightCol, leftIndent) {
   if (line.trim() === '') return ['', '']
   const indent = indentOf(line)
-  const text = line.trim()
-  const looksLikeStep = /^\d{1,2}\.\s/.test(text) || (/\.$/.test(text) && !/[–(]/.test(text))
-  if (indent >= rightCol - 4 || indent > leftIndent + 6 || looksLikeStep) return ['', text]
+  if (indent >= rightCol - 4 || indent > leftIndent + 6) return ['', line.trim()]
   const rest = line.slice(indent)
   const m = rest.match(/ {2,}/)
-  if (!m) return [rest.trim(), '']
-  return [rest.slice(0, m.index).trim(), rest.slice(m.index).trim()]
+  const left = m ? rest.slice(0, m.index).trim() : rest.trim()
+  const right = m ? rest.slice(m.index).trim() : ''
+  // Oceniamy tylko lewą część, bo w "175 g      pieprzem według uznania." kropka należy do kroku.
+  const looksLikeStep = /^\d{1,2}\.\s/.test(left) || (/\.$/.test(left) && !/[–(]/.test(left))
+  if (looksLikeStep) return ['', rest.trim()]
+  return [left, right]
 }
 
 // "Ryż basmati – 50 g" albo "Cebula – 0.5 sztuki (40 g)" / "Cebula – 0,5 x sztuka (40 g)"
@@ -95,6 +112,17 @@ function parseIngredients(text, warnings, title) {
   return out
 }
 
+// W PDF-ie zdarza się składnik wklejony w środek kroku ("…zimną wodę Koper posiekany – 2 łyżeczki (8 g) Sól…").
+// Nazwa to wielka litera plus maksymalnie dwa słowa, żeby nie złapać poprzedzającego zdania.
+const STRAY_ING_RE =
+  /\s*\p{Lu}\p{Ll}*(?: [\p{Ll}\d%]+){0,2} – \d+(?:[.,]\d+)? (?:x )?[^()–.]+? \(\d+(?:[.,]\d+)? (?:g|ml)\)/gu
+
+function extractStrayIngredients(text, warnings, title) {
+  const found = text.match(STRAY_ING_RE) ?? []
+  for (const f of found) warnings.push(`${title}: przeniesiono z kroków do składników: "${f.trim()}"`)
+  return { stray: found.join(' '), rest: text.replace(STRAY_ING_RE, '') }
+}
+
 function parseSteps(text) {
   return text
     .split(/(?:^|\s)(?=\d{1,2}\.\s)/)
@@ -130,7 +158,8 @@ for (let r = 0; r < metaIdx.length; r++) {
     if (rt) right.push(rt)
   }
 
-  const ingredientText = left.join(' ').replace(/\s+/g, ' ')
+  const { stray, rest: stepText } = extractStrayIngredients(right.join(' ').replace(/\s+/g, ' '), warnings, title)
+  const ingredientText = `${left.join(' ')} ${stray}`.replace(/\s+/g, ' ').trim()
   recipes.push({
     id: title
       .toLowerCase()
@@ -147,7 +176,7 @@ for (let r = 0; r < metaIdx.length; r++) {
     ...(m[5] ? { timeMin: num(m[5]) } : {}),
     servings: m[6] ? num(m[6]) : 1,
     ingredients: parseIngredients(ingredientText, warnings, title),
-    steps: parseSteps(right.join(' ').replace(/\s+/g, ' ')),
+    steps: parseSteps(stepText),
   })
 }
 
