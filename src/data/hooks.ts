@@ -2,7 +2,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useMemo, useState } from 'react'
 import type { Profile } from '../engine/profile'
 import { db, type StoredRecipe } from './db'
-import { DEFAULT_PROFILES, SAMPLE_RECIPES } from './defaults'
+import { defaultProfiles, SAMPLE_RECIPES } from './defaults'
+import { useHouseholdRealmId } from './household'
 
 /** Stored recipes, or the bundled samples while there are none. */
 export function useRecipes(): StoredRecipe[] | undefined {
@@ -15,10 +16,17 @@ export function useRecipeMap(): Map<string, StoredRecipe> | undefined {
   return useMemo(() => recipes && new Map(recipes.map((r) => [r.id, r])), [recipes])
 }
 
-/** Both people, with defaults for a profile that was never edited. */
+/** Both people (of the shared plan, if there is one), with defaults for a profile never edited. */
 export function useProfiles(): Profile[] | undefined {
   const stored = useLiveQuery(() => db.profiles.toArray(), [])
-  return useMemo(() => stored && DEFAULT_PROFILES.map((d) => stored.find((p) => p.id === d.id) ?? d), [stored])
+  const realmId = useHouseholdRealmId()
+  return useMemo(
+    () =>
+      stored && realmId !== undefined
+        ? defaultProfiles(realmId).map((d) => stored.find((p) => p.id === d.id) ?? d)
+        : undefined,
+    [stored, realmId],
+  )
 }
 
 /**

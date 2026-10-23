@@ -145,8 +145,9 @@ Dexie Cloud instead of Supabase: the app already uses Dexie, so sync is an addon
 - [x] Data created before logging in moves to the account; sync status and logout in Settings
 - [x] Recipe photos sync as blobs
 - [x] Conflict resolution: Dexie Cloud's per-property last write wins
-- [ ] Restrict new accounts ("Policy for new users" in Dexie Cloud Manager) so strangers can't use the public demo to sign up
-- [ ] Shared plan for two separate accounts (Dexie Cloud realms and invites)
+- [x] Restrict new accounts: "Reject all unknown users" in Dexie Cloud Manager, the two accounts are listed there
+- [x] Shared plan for two separate accounts ([src/data/household.ts](src/data/household.ts)): the owner invites by e-mail, all their data moves to a shared realm, the other person accepts in the app (their own data is deleted after confirming) and everything either of them adds goes to the shared realm
+- [ ] Leave the shared plan / remove a member
 
 ## Phase 8: Portfolio
 

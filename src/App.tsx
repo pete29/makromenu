@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { InviteBanner } from './screens/InviteBanner'
 import { LoginDialog } from './screens/LoginDialog'
 import { RecipeDetail } from './screens/RecipeDetail'
 import { PlanScreen } from './screens/PlanScreen'
@@ -23,6 +24,7 @@ function App() {
   return (
     <div className="min-h-dvh bg-stone-50 text-stone-900 dark:bg-stone-900 dark:text-stone-100">
       <main className="mx-auto max-w-md px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-28">
+        <InviteBanner />
         {tab === 'plan' && <PlanScreen />}
         {tab === 'recipes' &&
           (recipeId ? (

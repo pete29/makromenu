@@ -2,6 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+// Registers the hook that puts new data in the shared plan; must load before anything is written.
+import './data/household'
 import { migrateLegacyDatabase } from './data/migrateLegacy'
 
 // Ask the browser not to evict the plan and recipes when storage runs low or the app sits unused.

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 // db.ts opens IndexedDB, which the test environment doesn't have; parsing doesn't need it.
 vi.mock('./db', () => ({ db: {} }))
+vi.mock('./household', () => ({ householdRealmId: () => undefined }))
 
 const { parseBackup } = await import('./backup')
 

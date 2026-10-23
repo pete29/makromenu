@@ -1,6 +1,7 @@
 import type { Profile } from '../engine/profile'
 import { db, imageBlobs, writeRecipes, type ShoppingCheck, type StoredMeal } from './db'
-import { DEFAULT_PROFILES, SAMPLE_RECIPES } from './defaults'
+import { defaultProfiles, profileId, SAMPLE_RECIPES, slotOf } from './defaults'
+import { householdRealmId } from './household'
 import { ImportError, parseRecipesJson, type ImportedRecipe } from './importRecipes'
 
 export const BACKUP_VERSION = 1
@@ -40,7 +41,7 @@ export async function createBackup(): Promise<Backup> {
     exportedAt: new Date().toISOString(),
     recipes: recipes.map((r) => (imageUrls.has(r.id) ? { ...r, image: imageUrls.get(r.id) } : r)),
     // Profiles nobody edited aren't stored, but a backup always has both people.
-    profiles: DEFAULT_PROFILES.map((d) => profiles.find((p) => p.id === d.id) ?? d),
+    profiles: defaultProfiles(householdRealmId()).map((d) => profiles.find((p) => p.id === d.id) ?? d),
     // Ids are local to this database; restoring assigns new ones.
     mealPlan: mealPlan.map((m) => ({ date: m.date, type: m.type, recipeId: m.recipeId, profileIds: m.profileIds })),
     shoppingChecks: checks.map((c) => c.name),
@@ -103,8 +104,8 @@ export function parseBackup(text: string): Backup {
 
 const SAMPLE_IDS = new Set(SAMPLE_RECIPES.map((r) => r.id))
 
-/** Profiles use per-user private ids; backups from before cloud sync have plain ones ("a"). */
-const privateId = (id: string) => (id.startsWith('#') ? id : `#${id}`)
+/** Any profile id in a backup ("a", "#a", "<realm>:a") as the id of that person in the current plan. */
+const currentProfileId = (id: string) => profileId(slotOf(id), householdRealmId())
 
 /**
  * Replaces all data (on the device and, when logged in, in the account) with the backup. Ids are
@@ -119,14 +120,14 @@ export async function restoreBackup(backup: Backup): Promise<void> {
     await Promise.all(tables.map((t) => t.clear()))
     const recipeId = await writeRecipes(recipes, blobs)
 
-    await db.profiles.bulkPut(backup.profiles.map((p) => ({ ...p, id: privateId(p.id) })))
+    await db.profiles.bulkPut(backup.profiles.map((p) => ({ ...p, id: currentProfileId(p.id) })))
     await db.mealPlan.bulkAdd(
       backup.mealPlan.map((m) => ({
         date: m.date,
         type: m.type,
         // Meals planned with a sample keep its id, samples have the same ids everywhere.
         recipeId: recipeId.get(m.recipeId) ?? m.recipeId,
-        profileIds: m.profileIds.map(privateId),
+        profileIds: m.profileIds.map(currentProfileId),
       })) as StoredMeal[],
     )
     await db.shoppingChecks.bulkAdd(backup.shoppingChecks.map((name) => ({ name })) as ShoppingCheck[])

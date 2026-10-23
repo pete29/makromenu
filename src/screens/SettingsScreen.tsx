@@ -4,6 +4,7 @@ import { useProfiles, useRecipes } from '../data/hooks'
 import { ImportError, parseRecipesJson } from '../data/importRecipes'
 import { AccountSection } from './AccountSection'
 import { BackupSection } from './BackupSection'
+import { HouseholdSection } from './HouseholdSection'
 import { ProfileCard } from './ProfileCard'
 
 type Status = { kind: 'ok' | 'error'; text: string } | null
@@ -35,6 +36,7 @@ export function SettingsScreen() {
 
       <div className="mt-6">
         <AccountSection />
+        <HouseholdSection />
       </div>
 
       <h2 className="mt-6 mb-2 text-lg font-semibold">Osoby</h2>
