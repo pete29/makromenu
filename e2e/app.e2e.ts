@@ -30,6 +30,24 @@ async function planDay(page: Page) {
   await planMeal(page, 'Kolacja', 'zupa')
 }
 
+/** Rows in an IndexedDB store, read directly: the UI can show a change before it is written. */
+const storedCount = (page: Page, store: string) =>
+  page.evaluate(
+    (store) =>
+      new Promise<number>((resolve, reject) => {
+        const open = indexedDB.open('makromenu-cloud')
+        open.onerror = () => reject(open.error)
+        open.onsuccess = () => {
+          const count = open.result.transaction(store).objectStore(store).count()
+          count.onsuccess = () => {
+            open.result.close()
+            resolve(count.result)
+          }
+        }
+      }),
+    store,
+  )
+
 test.beforeEach(async ({ page }) => {
   await page.goto('./')
   await expect(page.getByRole('heading', { name: 'Plan' })).toBeVisible()
@@ -69,6 +87,8 @@ test('shopping list is grouped by section and remembers checked items', async ({
   await expect(page.getByRole('heading', { name: 'Warzywa i owoce' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Mięso i ryby' })).toBeVisible()
   await page.getByLabel(/^Banan/).check()
+  // Reloading right away could cut off the write.
+  await expect.poll(() => storedCount(page, 'shoppingChecks')).toBe(1)
   await page.reload()
   await nav(page, 'Zakupy')
   await expect(page.getByLabel(/^Banan/)).toBeChecked()
@@ -100,6 +120,8 @@ test('works offline once loaded', async ({ page, context }) => {
   if (!(await page.evaluate(() => !!navigator.serviceWorker.controller))) await page.reload()
   await page.waitForFunction(() => !!navigator.serviceWorker.controller)
   await planMeal(page, 'Obiad', 'kurczak')
+  // The card appears once the meal is stored, so going offline and reloading can't lose it.
+  await expect(page.getByRole('button', { name: /^Kurczak z ryżem/ })).toBeVisible()
   await context.setOffline(true)
   await page.reload()
   await expect(page.getByRole('button', { name: /^Kurczak z ryżem/ })).toBeVisible()
