@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { RecipeDetail } from './screens/RecipeDetail'
+import { PlanScreen } from './screens/PlanScreen'
 import { RecipesScreen } from './screens/RecipesScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 
@@ -22,13 +23,13 @@ function ComingSoon({ title }: { title: string }) {
 }
 
 function App() {
-  const [tab, setTab] = useState<Tab>('recipes')
+  const [tab, setTab] = useState<Tab>('plan')
   const [recipeId, setRecipeId] = useState<string | null>(null)
 
   return (
     <div className="min-h-dvh bg-stone-50 text-stone-900 dark:bg-stone-900 dark:text-stone-100">
       <main className="mx-auto max-w-md px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-28">
-        {tab === 'plan' && <ComingSoon title="Plan" />}
+        {tab === 'plan' && <PlanScreen />}
         {tab === 'recipes' &&
           (recipeId ? (
             <RecipeDetail id={recipeId} onBack={() => setRecipeId(null)} />

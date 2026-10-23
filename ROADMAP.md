@@ -87,7 +87,8 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 Scaling works on recipe-level kcal from the PDF: calories are linear in ingredient weights, so a portion's factor is target ÷ kcal per serving. The ingredient database (Phase 2) is only needed for exact kcal after rounding and for store sections.
 
 - [x] Person profile: calorie target (default 1500), meals with percentage split ([src/engine/profile.ts](src/engine/profile.ts))
-- [x] With a large calorie gap between people: an extra snack for one person; their daily kcal is re-split across the meals they actually eat ([src/engine/plan.ts](src/engine/plan.ts))
+- [x] With a large calorie gap between people: an extra snack for one person; its weight is added to their day, so their other meals get smaller ([src/engine/plan.ts](src/engine/plan.ts))
+- [x] Meal targets are relative to the profile's full day, so they stay the same while the day is being filled in
 - [x] Meal calorie target = daily target × meal share
 - [x] Scaling factor = meal target ÷ kcal per serving (accounting for `porcje: N`) ([src/engine/scaling.ts](src/engine/scaling.ts))
 - [~] Common-sense rules:
@@ -115,9 +116,11 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 - [x] Mobile layout + bottom navigation (safe-area aware)
 - [~] **Recipes:** list, search by name or ingredient (diacritics-insensitive), recipe details; filter by meal type after meal types are assigned
 - [ ] **Settings:** profiles (name, kcal, number of meals, % split)
-- [ ] **Weekly planner:**
-  - [ ] days × meals grid
-  - [ ] manual recipe selection and swapping
+- [~] **Weekly planner** ([src/screens/PlanScreen.tsx](src/screens/PlanScreen.tsx)):
+  - [x] week navigation + day strip, meals of the selected day by type
+  - [x] manual recipe selection and swapping; the picker sorts recipes by how well they fit the meal's kcal targets and flags poor fits
+  - [x] per-meal "who eats it" toggles (extra snack for one person) and kcal per person
+  - [x] day totals: kcal / target and macros per person
   - [ ] auto-fill the week (matching meal type, few repeats, recipes that scale well)
   - [ ] "cook once, eat for 2 days" for multi-serving recipes
 - [ ] **Day view:** meals with portions for each person, "per plate" / "to cook" toggle, total kcal and macros

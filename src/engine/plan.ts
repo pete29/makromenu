@@ -1,5 +1,5 @@
 import type { MealType, Profile } from './profile'
-import { portionMeal, type MealPortions } from './scaling'
+import { MAX_FACTOR, MIN_FACTOR, portionMeal, type MealPortions } from './scaling'
 import type { Macros, Recipe } from './types'
 import { baseUnit } from './units'
 
@@ -38,9 +38,11 @@ const weightOf = (profile: Profile, type: MealType) =>
   profile.meals.find((m) => m.type === type)?.share ?? 0
 
 /**
- * Calorie target of each planned meal for each person eating it. A person's daily calories are
- * split across the meals they actually eat that day by meal-type weights, so an extra snack makes
- * their other meals smaller and the day still adds up.
+ * Calorie target of each planned meal for each person eating it. Targets are relative to the
+ * person's full day from their profile (breakfast 30%, lunch 35%…), so they don't change while the
+ * day is being filled in. Planning more meals of a type than the profile has (an extra snack) adds
+ * that meal's weight to the day and makes the other meals smaller. Once every meal is planned,
+ * the day adds up to the daily target.
  */
 export function mealTargets(profiles: Profile[], dayMeals: PlannedMeal[]): number[][] {
   return dayMeals.map((meal) =>
@@ -48,10 +50,33 @@ export function mealTargets(profiles: Profile[], dayMeals: PlannedMeal[]): numbe
       const profile = profiles.find((p) => p.id === id)
       if (!profile) throw new Error(`Unknown profile: ${id}`)
       const eaten = dayMeals.filter((m) => m.profileIds.includes(id))
-      const total = eaten.reduce((a, m) => a + weightOf(profile, m.type), 0)
+      const types = new Set([...profile.meals.map((m) => m.type), ...eaten.map((m) => m.type)])
+      let total = 0
+      for (const type of types) {
+        const inProfile = profile.meals.some((m) => m.type === type) ? 1 : 0
+        const planned = eaten.filter((m) => m.type === type).length
+        total += weightOf(profile, type) * Math.max(inProfile, planned)
+      }
       return total > 0 ? Math.round((profile.dailyKcal * weightOf(profile, meal.type)) / total) : 0
     }),
   )
+}
+
+export interface RecipeFit {
+  factors: number[]
+  inRange: boolean
+  /** 0 = every portion is exactly one serving; ×2 and ×0.5 count as equally far. */
+  distance: number
+}
+
+/** How well a recipe fits the calorie targets of one meal; lower distance fits better. */
+export function recipeFit(recipe: Recipe, targetsKcal: number[]): RecipeFit {
+  const factors = targetsKcal.map((t) => t / recipe.kcal)
+  return {
+    factors,
+    inRange: factors.every((f) => f >= MIN_FACTOR && f <= MAX_FACTOR),
+    distance: Math.max(...factors.map((f) => Math.abs(Math.log(f)))),
+  }
 }
 
 /** Portions for all meals of one day plus kcal and macros per person. */

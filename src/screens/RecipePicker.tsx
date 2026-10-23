@@ -1,0 +1,67 @@
+import { useMemo, useState } from 'react'
+import { recipeFit } from '../engine/plan'
+import type { Recipe } from '../engine/types'
+import { formatNumber, searchKey } from '../ui/format'
+
+interface Props {
+  title: string
+  recipes: Recipe[]
+  /** Calorie target of this meal for each person eating it. */
+  targets: number[]
+  names: string[]
+  onPick: (recipeId: string) => void
+  onClose: () => void
+}
+
+/** Full-screen recipe chooser, best-fitting portions first. */
+export function RecipePicker({ title, recipes, targets, names, onPick, onClose }: Props) {
+  const [query, setQuery] = useState('')
+
+  const ranked = useMemo(() => {
+    const q = searchKey(query.trim())
+    return recipes
+      .filter((r) => !q || searchKey(r.name).includes(q) || r.ingredients.some((i) => searchKey(i.name).includes(q)))
+      .map((recipe) => ({ recipe, fit: recipeFit(recipe, targets) }))
+      .sort((a, b) => a.fit.distance - b.fit.distance)
+  }, [recipes, targets, query])
+
+  return (
+    <div className="fixed inset-0 z-20 overflow-y-auto bg-stone-50 dark:bg-stone-900">
+      <div className="mx-auto max-w-md px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-xl font-bold tracking-tight">{title}</h1>
+          <button onClick={onClose} className="py-1 text-emerald-700 dark:text-emerald-400">
+            Anuluj
+          </button>
+        </div>
+        <p className="mt-1 text-sm text-stone-500">
+          Cel: {names.map((n, i) => `${n} ${targets[i]} kcal`).join(' · ')}
+        </p>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Szukaj po nazwie lub składniku"
+          autoFocus
+          className="mt-4 w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-base outline-none focus:border-emerald-600 dark:border-stone-700 dark:bg-stone-800"
+        />
+        <ul className="mt-3 divide-y divide-stone-200 dark:divide-stone-800">
+          {ranked.map(({ recipe, fit }) => (
+            <li key={recipe.id}>
+              <button onClick={() => onPick(recipe.id)} className="w-full py-3 text-left">
+                <span className="block font-medium">{recipe.name}</span>
+                <span className="mt-0.5 block text-sm text-stone-500">
+                  {recipe.kcal} kcal ·{' '}
+                  <span className={fit.inRange ? '' : 'text-amber-700 dark:text-amber-400'}>
+                    porcje {fit.factors.map((f) => `×${formatNumber(Math.round(f * 10) / 10)}`).join(' / ')}
+                    {!fit.inRange && ' · słabo pasuje'}
+                  </span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
