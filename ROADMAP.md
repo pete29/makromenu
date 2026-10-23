@@ -84,20 +84,23 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 
 ## Phase 3: Scaling engine (plain TS + tests)
 
-- [ ] Person profile: calorie target (default 1500), number of meals, percentage split across meals
+Scaling works on recipe-level kcal from the PDF: calories are linear in ingredient weights, so a portion's factor is target ÷ kcal per serving. The ingredient database (Phase 2) is only needed for exact kcal after rounding and for store sections.
+
+- [x] Person profile: calorie target (default 1500), meals with percentage split ([src/engine/profile.ts](src/engine/profile.ts))
 - [ ] With a large calorie gap between people: an extra snack instead of extreme scaling
-- [ ] Meal calorie target = daily target × meal share
-- [ ] Scaling factor = meal target ÷ kcal per serving (accounting for `porcje: N`)
-- [ ] Common-sense rules:
-  - [ ] scaling limit (e.g. 0.6–1.6×); outside it, suggest another recipe or a snack
-  - [ ] pieces rounded to whole or half units
-  - [ ] "don't scale" ingredients unchanged
-  - [ ] grams rounded to 5 or 10 g
-  - [ ] recalculate real kcal after rounding and show the difference from the target
-- [ ] Portions for two people from one recipe: "per plate" for each person + "to cook" combined
+- [x] Meal calorie target = daily target × meal share
+- [x] Scaling factor = meal target ÷ kcal per serving (accounting for `porcje: N`) ([src/engine/scaling.ts](src/engine/scaling.ts))
+- [~] Common-sense rules:
+  - [x] scaling limit 0.6–1.6× flagged as `inRange: false` (suggesting another recipe or a snack: in the planner)
+  - [x] household units rounded to halves (glasses to quarters), never down to zero
+  - [x] pinches (salt, pepper) are not scaled; other spices and water still scale
+  - [x] grams rounded to 1 / 5 / 10 g depending on size
+  - [ ] recalculate real kcal after rounding and show the difference from the target (needs Phase 2)
+- [x] Portions for two people from one recipe: one pot "to cook" for the sum of portions + each person's share and kcal/macros "per plate"
+- [x] Polish unit inflection: 1 sztuka, 2 sztuki, 5 sztuk, 1.5 sztuki ([src/engine/units.ts](src/engine/units.ts))
 - [ ] Daily summary: kcal and macros per person
 - [ ] Shopping list: sum of weights over the selected range of days for both people, grouped by section
-- [ ] Unit tests (Vitest)
+- [~] Unit tests (Vitest), on made-up sample recipes (`npm test`)
 
 ## Phase 4: App data layer
 
