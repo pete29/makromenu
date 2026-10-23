@@ -4,7 +4,9 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command, isPreview }) => ({
+  // GitHub Pages serves the app from https://<user>.github.io/makromenu/; `vite preview` mirrors that.
+  base: command === 'build' || isPreview ? '/makromenu/' : '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -30,4 +32,4 @@ export default defineConfig({
       },
     }),
   ],
-})
+}))

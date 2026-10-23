@@ -2,7 +2,7 @@
 
 An app for planning a weekly menu from a recipe collection. The plan is shared by two people, and portions are scaled to each person's calorie target. A shopping list is generated from the plan.
 
-**Stack:** React + Vite + TypeScript, Tailwind CSS 4, Dexie (IndexedDB), vite-plugin-pwa, Vitest. Hosting on Vercel or GitHub Pages.
+**Stack:** React + Vite + TypeScript, Tailwind CSS 4, Dexie (IndexedDB), vite-plugin-pwa, Vitest. Hosted on GitHub Pages.
 
 Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 
@@ -133,7 +133,7 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 - [x] Manifest, icons (SVG favicon, Apple 180 px, 192/512 px, maskable), theme color, iOS meta tags
 - [x] Offline support (service worker via vite-plugin-pwa, auto-update on next launch)
 - [x] Ask for persistent storage so the browser doesn't evict the data
-- [ ] Deploy to Vercel or GitHub Pages
+- [~] Deploy to GitHub Pages via GitHub Actions ([.github/workflows/deploy.yml](.github/workflows/deploy.yml)), base path `/makromenu/`
 - [ ] Test on iPhone: "Add to Home Screen"
 
 ## Phase 7: Sync (optional)
@@ -144,6 +144,6 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 
 ## Phase 8: Portfolio
 
-- [ ] README: description, screenshots, demo link, how scaling works
-- [ ] GitHub Actions: lint + tests + build
+- [~] README: description and how scaling works done; screenshots and demo link to add
+- [~] GitHub Actions: lint + tests + build on every push and PR, deploy from `main` (waiting for the first run)
 - [ ] Demo on sample recipes
