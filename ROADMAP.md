@@ -50,7 +50,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 - [x] App name: **Makromenu**
 - [ ] Rename folder `jadlospis` → `makromenu` (manually, with VS Code closed)
 - [x] `git init`, `.gitignore` (including private recipe data), first commit
-- [ ] GitHub repo
+- [x] GitHub repo: [pete29/makromenu](https://github.com/pete29/makromenu)
 - [x] Clean up the default Vite template
 - [x] Tailwind CSS 4 (`@tailwindcss/vite`)
 
@@ -133,7 +133,7 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 - [x] Manifest, icons (SVG favicon, Apple 180 px, 192/512 px, maskable), theme color, iOS meta tags
 - [x] Offline support (service worker via vite-plugin-pwa, auto-update on next launch)
 - [x] Ask for persistent storage so the browser doesn't evict the data
-- [~] Deploy to GitHub Pages via GitHub Actions ([.github/workflows/deploy.yml](.github/workflows/deploy.yml)), base path `/makromenu/`
+- [x] Deploy to GitHub Pages via GitHub Actions: https://pete29.github.io/makromenu/ ([.github/workflows/deploy.yml](.github/workflows/deploy.yml)), base path `/makromenu/`
 - [ ] Test on iPhone: "Add to Home Screen"
 
 ## Phase 7: Sync (optional)
@@ -144,6 +144,6 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 
 ## Phase 8: Portfolio
 
-- [~] README: description and how scaling works done; screenshots and demo link to add
-- [~] GitHub Actions: lint + tests + build on every push and PR, deploy from `main` (waiting for the first run)
+- [~] README: description, demo link and how scaling works done; screenshots to add
+- [x] GitHub Actions: lint + tests + build on every push and PR, deploy from `main`
 - [ ] Demo on sample recipes

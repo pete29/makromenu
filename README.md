@@ -4,6 +4,8 @@ A weekly meal planner for two people who eat the same meals but need different a
 
 The app is in Polish and runs on the phone as an installable PWA that works offline.
 
+**Demo:** https://pete29.github.io/makromenu/ (with made-up sample recipes)
+
 ## What it does
 
 - **Weekly planner.** Pick a recipe for each meal of the day or let the app fill the week: recipes matching the meal type, close to the calorie target, with no repeats on neighbouring days.
