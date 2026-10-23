@@ -95,7 +95,10 @@ test('imported recipes replace the samples', async ({ page }) => {
 })
 
 test('works offline once loaded', async ({ page, context }) => {
+  // An installed service worker serves the app only once it controls the page.
   await page.evaluate(() => navigator.serviceWorker.ready)
+  if (!(await page.evaluate(() => !!navigator.serviceWorker.controller))) await page.reload()
+  await page.waitForFunction(() => !!navigator.serviceWorker.controller)
   await planMeal(page, 'Obiad', 'kurczak')
   await context.setOffline(true)
   await page.reload()
