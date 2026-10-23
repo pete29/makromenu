@@ -135,12 +135,12 @@ export function PlanScreen() {
 
       <DayTotals profiles={profiles} totals={summary.totals} empty={planned.length === 0} />
 
-      {MEAL_ORDER.map((type) => (
-        <section key={type} className="mt-5">
-          <h2 className="text-sm font-semibold text-stone-500 uppercase">{MEAL_LABELS[type]}</h2>
-          {dayMeals
-            .filter((m) => m.type === type)
-            .map((meal) => (
+      {MEAL_ORDER.map((type) => {
+        const ofType = dayMeals.filter((m) => m.type === type)
+        return (
+          <section key={type} className="mt-5">
+            <h2 className="text-sm font-semibold text-stone-500 uppercase">{MEAL_LABELS[type]}</h2>
+            {ofType.map((meal) => (
               <MealCard
                 key={meal.id}
                 meal={meal}
@@ -153,14 +153,24 @@ export function PlanScreen() {
                 onToggleEater={(id) => toggleEater(meal, id)}
               />
             ))}
-          <button
-            onClick={() => setPicker({ type })}
-            className="mt-2 w-full rounded-xl border border-dashed border-stone-300 py-2.5 text-stone-500 dark:border-stone-700"
-          >
-            + Dodaj
-          </button>
-        </section>
-      ))}
+            {ofType.length === 0 ? (
+              <button
+                onClick={() => setPicker({ type })}
+                className="mt-2 w-full rounded-xl border border-dashed border-stone-300 py-2.5 text-stone-500 dark:border-stone-700"
+              >
+                + Dodaj
+              </button>
+            ) : (
+              // An extra snack for one person is how a large calorie gap is handled.
+              type === 'snack' && (
+                <button onClick={() => setPicker({ type })} className="mt-2 text-sm text-emerald-700 dark:text-emerald-400">
+                  + dodatkowa przekąska
+                </button>
+              )
+            )}
+          </section>
+        )
+      })}
     </div>
   )
 }
