@@ -1,6 +1,13 @@
 import { MEAL_TYPES } from '../engine/profile'
 import type { Ingredient, Recipe } from '../engine/types'
 
+/** A recipe as it comes in a file: optionally with its photo as a data URL. */
+export interface ImportedRecipe extends Recipe {
+  image?: string
+}
+
+const IMAGE_DATA_URL = /^data:image\/(jpeg|png|webp);base64,/
+
 // Messages are shown in the app, hence Polish.
 export class ImportError extends Error {}
 
@@ -18,7 +25,7 @@ function parseIngredient(v: unknown, where: string): Ingredient {
   }
 }
 
-function parseRecipe(v: unknown, index: number): Recipe {
+function parseRecipe(v: unknown, index: number): ImportedRecipe {
   const r = v as Record<string, unknown>
   const where = `Przepis ${index + 1}${r && isStr(r.name) ? ` („${r.name}”)` : ''}`
   if (!r || !isStr(r.id) || !isStr(r.name)) throw new ImportError(`${where}: brak id lub nazwy`)
@@ -42,11 +49,12 @@ function parseRecipe(v: unknown, index: number): Recipe {
     steps: Array.isArray(r.steps) ? r.steps.filter(isStr) : [],
     ...(mealTypes.length > 0 ? { mealTypes } : {}),
     ...(isStr(r.slug) ? { slug: r.slug } : {}),
+    ...(isStr(r.image) && IMAGE_DATA_URL.test(r.image) ? { image: r.image } : {}),
   }
 }
 
 /** Validates a recipes JSON file (output of scripts/import-pdf.mjs). */
-export function parseRecipesJson(text: string): Recipe[] {
+export function parseRecipesJson(text: string): ImportedRecipe[] {
   let data: unknown
   try {
     data = JSON.parse(text)

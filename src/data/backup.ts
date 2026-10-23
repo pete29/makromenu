@@ -1,8 +1,7 @@
 import type { Profile } from '../engine/profile'
-import type { Recipe } from '../engine/types'
-import { db, type ShoppingCheck, type StoredMeal, type StoredRecipe } from './db'
+import { db, imageBlobs, writeRecipes, type ShoppingCheck, type StoredMeal } from './db'
 import { DEFAULT_PROFILES, SAMPLE_RECIPES } from './defaults'
-import { ImportError, parseRecipesJson } from './importRecipes'
+import { ImportError, parseRecipesJson, type ImportedRecipe } from './importRecipes'
 
 export const BACKUP_VERSION = 1
 
@@ -10,24 +9,36 @@ export interface Backup {
   app: 'makromenu'
   version: number
   exportedAt: string
-  recipes: Recipe[]
+  /** With photos as data URLs, like an import file. */
+  recipes: ImportedRecipe[]
   profiles: Profile[]
   mealPlan: Omit<StoredMeal, 'id'>[]
   shoppingChecks: string[]
 }
 
+function toDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
+}
+
 export async function createBackup(): Promise<Backup> {
-  const [recipes, profiles, mealPlan, checks] = await Promise.all([
+  const [recipes, profiles, mealPlan, checks, images] = await Promise.all([
     db.recipes.toArray(),
     db.profiles.toArray(),
     db.mealPlan.toArray(),
     db.shoppingChecks.toArray(),
+    db.recipeImages.toArray(),
   ])
+  const imageUrls = new Map(await Promise.all(images.map(async (i) => [i.recipeId, await toDataUrl(i.blob)] as const)))
   return {
     app: 'makromenu',
     version: BACKUP_VERSION,
     exportedAt: new Date().toISOString(),
-    recipes,
+    recipes: recipes.map((r) => (imageUrls.has(r.id) ? { ...r, image: imageUrls.get(r.id) } : r)),
     // Profiles nobody edited aren't stored, but a backup always has both people.
     profiles: DEFAULT_PROFILES.map((d) => profiles.find((p) => p.id === d.id) ?? d),
     // Ids are local to this database; restoring assigns new ones.
@@ -100,18 +111,13 @@ const privateId = (id: string) => (id.startsWith('#') ? id : `#${id}`)
  * generated anew, so backups from before cloud sync (recipe ids like "rosol") work too.
  */
 export async function restoreBackup(backup: Backup): Promise<void> {
-  await db.transaction('rw', [db.recipes, db.profiles, db.mealPlan, db.shoppingChecks], async () => {
-    await Promise.all([db.recipes.clear(), db.profiles.clear(), db.mealPlan.clear(), db.shoppingChecks.clear()])
-
-    // Samples are built into the app, so older backups that stored them don't bring them back.
-    const recipes = backup.recipes.filter((r) => !SAMPLE_IDS.has(r.id))
-    const rows = recipes.map((r) => {
-      const row: Partial<StoredRecipe> = { ...r, slug: r.slug ?? r.id }
-      delete row.id
-      return row as StoredRecipe
-    })
-    const newIds = await db.recipes.bulkAdd(rows, { allKeys: true })
-    const recipeId = new Map(recipes.map((r, i) => [r.id, newIds[i]]))
+  // Samples are built into the app, so older backups that stored them don't bring them back.
+  const recipes = backup.recipes.filter((r) => !SAMPLE_IDS.has(r.id))
+  const blobs = await imageBlobs(recipes)
+  const tables = [db.recipes, db.recipeImages, db.profiles, db.mealPlan, db.shoppingChecks]
+  await db.transaction('rw', tables, async () => {
+    await Promise.all(tables.map((t) => t.clear()))
+    const recipeId = await writeRecipes(recipes, blobs)
 
     await db.profiles.bulkPut(backup.profiles.map((p) => ({ ...p, id: privateId(p.id) })))
     await db.mealPlan.bulkAdd(

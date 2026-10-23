@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import type { PortionedMeal } from '../engine/plan'
+import { useRecipeImageUrl } from '../data/hooks'
 import { splitIntoPlates } from '../engine/scaling'
 import { IngredientList } from './IngredientList'
+import { RecipePhoto } from './RecipePhoto'
 import { Steps } from './Steps'
 
 interface Props {
@@ -17,6 +19,7 @@ export function MealDetail({ portions, names, title, onBack }: Props) {
   // -1 = to cook, otherwise index of the plate
   const [view, setView] = useState(-1)
   const { recipe, cook, plates } = portions
+  const photo = useRecipeImageUrl(recipe.id)
   const plate = view >= 0 ? plates[view] : undefined
   const totalKcal = plates.reduce((a, p) => a + p.kcal, 0)
 
@@ -27,8 +30,13 @@ export function MealDetail({ portions, names, title, onBack }: Props) {
       <button onClick={onBack} className="-ml-1 py-1 text-emerald-700 dark:text-emerald-400">
         ‹ Plan
       </button>
-      <p className="mt-2 text-sm text-stone-500">{title}</p>
-      <h1 className="text-2xl font-bold tracking-tight">{recipe.name}</h1>
+      <div className="mt-2 flex items-center gap-3">
+        {photo && <RecipePhoto url={photo} size={72} />}
+        <div>
+          <p className="text-sm text-stone-500">{title}</p>
+          <h1 className="text-2xl font-bold tracking-tight">{recipe.name}</h1>
+        </div>
+      </div>
 
       <div role="tablist" className="mt-4 flex rounded-xl bg-stone-200 p-1 dark:bg-stone-800">
         {tabs.map((t) => (

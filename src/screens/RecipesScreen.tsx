@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
-import { useRecipes } from '../data/hooks'
+import { useRecipeImageUrls, useRecipes } from '../data/hooks'
 import { mealTypesOf } from '../engine/mealTypes'
 import type { MealType } from '../engine/profile'
 import { searchKey } from '../ui/format'
 import { MEAL_LABELS, MEAL_TYPES } from '../ui/labels'
 import { Chip } from './Chip'
+import { RecipePhoto } from './RecipePhoto'
 
 interface Props {
   onOpen: (id: string) => void
@@ -14,6 +15,7 @@ export function RecipesScreen({ onOpen }: Props) {
   const [query, setQuery] = useState('')
   const [type, setType] = useState<MealType | null>(null)
   const recipes = useRecipes()
+  const photos = useRecipeImageUrls()
 
   const visible = useMemo(() => {
     const q = searchKey(query.trim())
@@ -52,12 +54,15 @@ export function RecipesScreen({ onOpen }: Props) {
       <ul className="mt-3 divide-y divide-stone-200 dark:divide-stone-800">
         {visible.map((r) => (
           <li key={r.id}>
-            <button onClick={() => onOpen(r.id)} className="w-full py-3 text-left">
-              <span className="block font-medium">{r.name}</span>
-              <span className="mt-0.5 block text-sm text-stone-500">
-                {r.kcal} kcal · B {r.protein} · W {r.carbs} · T {r.fat}
-                {r.timeMin && ` · ${r.timeMin} min`}
-                {r.servings > 1 && ` · ${r.servings} porcje`}
+            <button onClick={() => onOpen(r.id)} className="flex w-full items-center gap-3 py-3 text-left">
+              {photos.size > 0 && <RecipePhoto url={photos.get(r.id)} size={56} />}
+              <span>
+                <span className="block font-medium">{r.name}</span>
+                <span className="mt-0.5 block text-sm text-stone-500">
+                  {r.kcal} kcal · B {r.protein} · W {r.carbs} · T {r.fat}
+                  {r.timeMin && ` · ${r.timeMin} min`}
+                  {r.servings > 1 && ` · ${r.servings} porcje`}
+                </span>
               </span>
             </button>
           </li>

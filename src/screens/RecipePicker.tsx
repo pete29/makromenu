@@ -4,7 +4,9 @@ import { recipeFit } from '../engine/plan'
 import type { MealType } from '../engine/profile'
 import type { Recipe } from '../engine/types'
 import { formatNumber, searchKey } from '../ui/format'
+import { useRecipeImageUrls } from '../data/hooks'
 import { Chip } from './Chip'
+import { RecipePhoto } from './RecipePhoto'
 
 interface Props {
   title: string
@@ -21,6 +23,7 @@ interface Props {
 export function RecipePicker({ title, mealType, recipes, targets, names, onPick, onClose }: Props) {
   const [query, setQuery] = useState('')
   const [onlyMatching, setOnlyMatching] = useState(true)
+  const photos = useRecipeImageUrls()
 
   const ranked = useMemo(() => {
     const q = searchKey(query.trim())
@@ -62,13 +65,16 @@ export function RecipePicker({ title, mealType, recipes, targets, names, onPick,
         <ul className="mt-3 divide-y divide-stone-200 dark:divide-stone-800">
           {ranked.map(({ recipe, fit }) => (
             <li key={recipe.id}>
-              <button onClick={() => onPick(recipe.id)} className="w-full py-3 text-left">
-                <span className="block font-medium">{recipe.name}</span>
-                <span className="mt-0.5 block text-sm text-stone-500">
-                  {recipe.kcal} kcal ·{' '}
-                  <span className={fit.inRange ? '' : 'text-amber-700 dark:text-amber-400'}>
-                    porcje {fit.factors.map((f) => `×${formatNumber(Math.round(f * 10) / 10)}`).join(' / ')}
-                    {!fit.inRange && ' · słabo pasuje'}
+              <button onClick={() => onPick(recipe.id)} className="flex w-full items-center gap-3 py-3 text-left">
+                {photos.size > 0 && <RecipePhoto url={photos.get(recipe.id)} size={56} />}
+                <span>
+                  <span className="block font-medium">{recipe.name}</span>
+                  <span className="mt-0.5 block text-sm text-stone-500">
+                    {recipe.kcal} kcal ·{' '}
+                    <span className={fit.inRange ? '' : 'text-amber-700 dark:text-amber-400'}>
+                      porcje {fit.factors.map((f) => `×${formatNumber(Math.round(f * 10) / 10)}`).join(' / ')}
+                      {!fit.inRange && ' · słabo pasuje'}
+                    </span>
                   </span>
                 </span>
               </button>

@@ -1,10 +1,11 @@
 import { db } from '../data/db'
-import { useRecipeMap } from '../data/hooks'
+import { useRecipeImageUrl, useRecipeMap } from '../data/hooks'
 import { mealTypesOf } from '../engine/mealTypes'
 import type { MealType } from '../engine/profile'
 import { MEAL_LABELS, MEAL_TYPES } from '../ui/labels'
 import { Chip } from './Chip'
 import { IngredientList } from './IngredientList'
+import { RecipePhoto } from './RecipePhoto'
 import { Steps } from './Steps'
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 
 export function RecipeDetail({ id, onBack }: Props) {
   const recipe = useRecipeMap()?.get(id)
+  const photo = useRecipeImageUrl(id)
 
   function toggleType(type: MealType) {
     // Samples are built into the app, not stored, so there is nothing to save the change to.
@@ -31,6 +33,7 @@ export function RecipeDetail({ id, onBack }: Props) {
       </button>
       {recipe && (
         <article>
+          {photo && <RecipePhoto url={photo} size={224} className="mx-auto mt-2 rounded-2xl" />}
           <h1 className="mt-2 text-2xl font-bold tracking-tight">{recipe.name}</h1>
           <dl className="mt-4 grid grid-cols-4 gap-2 text-center">
             {[
