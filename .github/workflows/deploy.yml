@@ -12,6 +12,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -21,7 +22,15 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
-      - run: npx playwright install --with-deps chromium
+      # The runner image already has Chromium's system libraries; installing them with
+      # --with-deps went through apt and once took 10 minutes. The browser itself is cached.
+      - id: playwright
+        run: echo "version=$(npx playwright --version | cut -d' ' -f2)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - run: npx playwright install chromium
       - run: npm run e2e
       - uses: actions/upload-artifact@v7
         if: failure()
