@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { db } from '../data/db'
 import { mealTargetKcal, type Profile } from '../engine/profile'
 import { MEAL_LABELS } from '../ui/labels'
@@ -14,6 +14,16 @@ export function ProfileCard({ profile }: { profile: Profile }) {
   const [name, setName] = useState(profile.name)
   const [kcal, setKcal] = useState(String(profile.dailyKcal))
   const [percents, setPercents] = useState(profile.meals.map((m) => toPercent(m.share)))
+  const sectionRef = useRef<HTMLElement>(null)
+
+  // The profile can change from outside: synced from another device, or arriving from the cloud
+  // right after logging in. Refresh the fields then, unless the user is typing in this card.
+  useEffect(() => {
+    if (sectionRef.current?.contains(document.activeElement)) return
+    setName(profile.name)
+    setKcal(String(profile.dailyKcal))
+    setPercents(profile.meals.map((m) => toPercent(m.share)))
+  }, [profile])
 
   // A default profile isn't stored until its first edit, so this reads the stored one (or the
   // default) inside the transaction: quick edits of different fields then can't overwrite each other.
@@ -46,7 +56,7 @@ export function ProfileCard({ profile }: { profile: Profile }) {
   const kcalInvalid = !validKcal(kcal)
 
   return (
-    <section className="rounded-2xl bg-white p-4 dark:bg-stone-800">
+    <section ref={sectionRef} className="rounded-2xl bg-white p-4 dark:bg-stone-800">
       <label className="block">
         <span className="text-sm text-stone-500">Imię</span>
         <input

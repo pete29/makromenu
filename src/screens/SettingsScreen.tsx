@@ -2,6 +2,7 @@ import { useState, type ChangeEvent } from 'react'
 import { saveImportedRecipes } from '../data/db'
 import { useProfiles, useRecipes } from '../data/hooks'
 import { ImportError, parseRecipesJson } from '../data/importRecipes'
+import { AccountSection } from './AccountSection'
 import { BackupSection } from './BackupSection'
 import { ProfileCard } from './ProfileCard'
 
@@ -31,6 +32,10 @@ export function SettingsScreen() {
   return (
     <div>
       <h1 className="text-2xl font-bold tracking-tight">Ustawienia</h1>
+
+      <div className="mt-6">
+        <AccountSection />
+      </div>
 
       <h2 className="mt-6 mb-2 text-lg font-semibold">Osoby</h2>
       <div className="space-y-3">

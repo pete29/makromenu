@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LoginDialog } from './screens/LoginDialog'
 import { RecipeDetail } from './screens/RecipeDetail'
 import { PlanScreen } from './screens/PlanScreen'
 import { RecipesScreen } from './screens/RecipesScreen'
@@ -53,6 +54,7 @@ function App() {
           ))}
         </ul>
       </nav>
+      <LoginDialog />
     </div>
   )
 }

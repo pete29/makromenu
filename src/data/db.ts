@@ -49,6 +49,9 @@ db.version(1).stores({
 /** Cloud sync is available when the build knows the database URL; without it the app is local only. */
 export const CLOUD_URL: string | undefined = import.meta.env.VITE_DEXIE_CLOUD_URL
 
+// Browser tests log in demo users through this; development builds only.
+if (import.meta.env.DEV) Object.assign(window, { db })
+
 if (CLOUD_URL) {
   db.cloud.configure({
     databaseUrl: CLOUD_URL,

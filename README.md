@@ -13,7 +13,7 @@ The app is in Polish and runs on the phone as an installable PWA that works offl
 - **Calorie targets per person.** Each person has a daily target and a split across meals. A large gap between people is handled with an extra snack for one of them instead of an extreme portion.
 - **Shopping list.** Sums ingredients over any range of days, grouped by store section, with check-off.
 - **Recipes.** Imported from a JSON file, searchable by name or ingredient, filterable by meal type.
-- **Offline and private.** All data stays in the browser (IndexedDB). Backup and restore through a file.
+- **Offline first, optional cloud.** Data lives in the browser (IndexedDB) and the app works offline. Logging in with an e-mail code syncs it through Dexie Cloud to every device on the same account. Backup and restore through a file.
 
 ## How scaling works
 
@@ -35,7 +35,7 @@ The recipes I use come from a dietitian and are not part of this repository. The
 
 ## Stack
 
-React 19, TypeScript, Vite, Tailwind CSS 4, Dexie (IndexedDB), vite-plugin-pwa, Vitest. Deployed to GitHub Pages by GitHub Actions after lint, tests and build pass.
+React 19, TypeScript, Vite, Tailwind CSS 4, Dexie (IndexedDB) with Dexie Cloud sync, vite-plugin-pwa, Vitest. Deployed to GitHub Pages by GitHub Actions after lint, tests and build pass.
 
 The scaling and planning logic lives in [`src/engine`](src/engine) as plain TypeScript with unit tests, independent of React.
 

@@ -136,11 +136,17 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 - [x] Deploy to GitHub Pages via GitHub Actions: https://pete29.github.io/makromenu/ ([.github/workflows/deploy.yml](.github/workflows/deploy.yml)), base path `/makromenu/`
 - [ ] Test on iPhone: "Add to Home Screen"
 
-## Phase 7: Sync (optional)
+## Phase 7: Sync
 
-- [ ] Supabase: shared plan and shopping list on two phones
-- [ ] Login (magic link)
-- [ ] Conflict resolution (last write wins)
+Dexie Cloud instead of Supabase: the app already uses Dexie, so sync is an addon over the same local database (offline-first, no sync code of our own), login is built in, and the free plan covers a few users. Data is per account; one account shared by two people gives one shared plan.
+
+- [x] Database restructured for sync: globally unique ids, per-user private profile ids, samples and default profiles built in instead of stored; one-time migration of the pre-sync database ([src/data/db.ts](src/data/db.ts))
+- [x] Optional login with an e-mail code (OTP), Polish dialog; code instead of a magic link, because on iPhone a link opens Safari, not the installed app ([src/screens/LoginDialog.tsx](src/screens/LoginDialog.tsx))
+- [x] Data created before logging in moves to the account; sync status and logout in Settings
+- [x] Recipe photos sync as blobs
+- [x] Conflict resolution: Dexie Cloud's per-property last write wins
+- [ ] Restrict new accounts ("Policy for new users" in Dexie Cloud Manager) so strangers can't use the public demo to sign up
+- [ ] Shared plan for two separate accounts (Dexie Cloud realms and invites)
 
 ## Phase 8: Portfolio
 
