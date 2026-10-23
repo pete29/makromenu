@@ -115,7 +115,7 @@ Scaling works on recipe-level kcal from the PDF: calories are linear in ingredie
 
 - [x] Mobile layout + bottom navigation (safe-area aware)
 - [~] **Recipes:** list, search by name or ingredient (diacritics-insensitive), recipe details; filter by meal type after meal types are assigned
-- [ ] **Settings:** profiles (name, kcal, number of meals, % split)
+- [x] **Settings:** profiles (name, daily kcal, % split per meal with kcal preview; 0% = doesn't eat that meal), saved as you type
 - [~] **Weekly planner** ([src/screens/PlanScreen.tsx](src/screens/PlanScreen.tsx)):
   - [x] week navigation + day strip, meals of the selected day by type
   - [x] manual recipe selection and swapping; the picker sorts recipes by how well they fit the meal's kcal targets and flags poor fits

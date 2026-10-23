@@ -2,12 +2,14 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useState, type ChangeEvent } from 'react'
 import { db, saveImportedRecipes } from '../data/db'
 import { ImportError, parseRecipesJson } from '../data/importRecipes'
+import { ProfileCard } from './ProfileCard'
 
 type Status = { kind: 'ok' | 'error'; text: string } | null
 
 export function SettingsScreen() {
   const [status, setStatus] = useState<Status>(null)
   const recipes = useLiveQuery(() => db.recipes.toArray(), [])
+  const profiles = useLiveQuery(() => db.profiles.toArray(), [])
   const sampleCount = recipes?.filter((r) => r.sample).length ?? 0
 
   async function onFile(e: ChangeEvent<HTMLInputElement>) {
@@ -29,7 +31,15 @@ export function SettingsScreen() {
     <div>
       <h1 className="text-2xl font-bold tracking-tight">Ustawienia</h1>
 
-      <section className="mt-6 rounded-2xl bg-white p-4 dark:bg-stone-800">
+      <h2 className="mt-6 mb-2 text-lg font-semibold">Osoby</h2>
+      <div className="space-y-3">
+        {profiles?.map((p) => (
+          <ProfileCard key={p.id} profile={p} />
+        ))}
+      </div>
+
+      <h2 className="mt-8 mb-2 text-lg font-semibold">Dane</h2>
+      <section className="rounded-2xl bg-white p-4 dark:bg-stone-800">
         <h2 className="font-semibold">Przepisy</h2>
         {recipes && (
           <p className="mt-1 text-sm text-stone-500">

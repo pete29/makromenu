@@ -41,11 +41,16 @@ export function PlanScreen() {
   const summary = portionDay(recipes, profiles, planned)
   const portionsById = new Map(planned.map((m, i) => [m.id, summary.meals[i]]))
   const nameOf = (id: string) => profiles.find((p) => p.id === id)?.name ?? '?'
+  // A new meal is for everyone who has that meal in their day (e.g. not for someone with 0% snacks).
+  const defaultEaters = (type: MealType) => {
+    const eating = profiles.filter((p) => p.meals.some((m) => m.type === type && m.share > 0))
+    return (eating.length > 0 ? eating : profiles).map((p) => p.id)
+  }
 
   async function pick(recipeId: string) {
     if (!picker) return
     if (picker.meal) await db.mealPlan.update(picker.meal.id, { recipeId })
-    else await db.mealPlan.add({ date: day, type: picker.type, recipeId, profileIds: profiles!.map((p) => p.id) } as StoredMeal)
+    else await db.mealPlan.add({ date: day, type: picker.type, recipeId, profileIds: defaultEaters(picker.type) } as StoredMeal)
     setPicker(null)
   }
 
@@ -73,7 +78,7 @@ export function PlanScreen() {
 
   if (picker) {
     // Targets don't depend on the recipe, so compute them once for a placeholder meal in this slot.
-    const eaters = picker.meal?.profileIds ?? profiles.map((p) => p.id)
+    const eaters = picker.meal?.profileIds ?? defaultEaters(picker.type)
     const others = planned.filter((m) => m.id !== picker.meal?.id)
     const candidate = { date: day, type: picker.type, recipeId: '', profileIds: eaters }
     const targets = mealTargets(profiles, [...others, candidate])[others.length]
