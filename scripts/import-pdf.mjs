@@ -1,13 +1,13 @@
-// Parsuje tekst wyciągnięty z PDF-a z przepisami do JSON-a.
-// Tekst: pdftotext -enc UTF-8 -layout Przepisy.pdf przepisy.txt
-//   (bez -enc UTF-8 na Windowsie znikają polskie litery i myślniki „–”)
-// Użycie: node scripts/import-pdf.mjs <przepisy.txt> <wyjście.json>
+// Parses text extracted from the recipe PDF into JSON.
+// Text: pdftotext -enc UTF-8 -layout Przepisy.pdf przepisy.txt
+//   (without -enc UTF-8 Polish letters and "–" dashes are lost on Windows)
+// Usage: node scripts/import-pdf.mjs <recipes.txt> <output.json>
 
 import { readFileSync, writeFileSync } from 'node:fs'
 
 const [, , inPath, outPath] = process.argv
 if (!inPath || !outPath) {
-  console.error('Użycie: node scripts/import-pdf.mjs <przepisy.txt> <wyjście.json>')
+  console.error('Usage: node scripts/import-pdf.mjs <recipes.txt> <output.json>')
   process.exit(1)
 }
 
@@ -16,8 +16,8 @@ const lines = readFileSync(inPath, 'utf8')
   .split(/\r?\n/)
   .map((l) => l.replace(/^brak zdjęcia/, '            '))
 
-// "Rosół   B 34 g  W 51 g  T 21 g …" + niżej "512 kcal": składamy w układ jak w reszcie
-// przepisów, czyli tytuł, a pod nim linia z kcal i makro.
+// "Rosół   B 34 g  W 51 g  T 21 g …" with "512 kcal" below: rearrange into the layout of the other
+// recipes, i.e. the title followed by a line with kcal and macros.
 for (let i = 0; i < lines.length; i++) {
   const kcal = lines[i].match(/^\s*(\d+) kcal\s*$/)
   if (!kcal) continue
@@ -45,7 +45,7 @@ function readTitle(k) {
   const title = []
   let i = k - 1
   while (i >= 0 && lines[i].trim() === '') i--
-  // Tytuł bywa wcięty inaczej niż linia z kcal, ale wszystkie jego linie mają to samo wcięcie.
+  // The title may be indented differently from the kcal line, but all of its lines share one indent.
   const titleIndent = i >= 0 ? indentOf(lines[i]) : 0
   while (
     i >= 0 &&
@@ -60,8 +60,8 @@ function readTitle(k) {
   return { title: title.join(' '), firstLine: i + 1 }
 }
 
-// Dzieli linię dwukolumnową na lewą (składniki) i prawą (przygotowanie) część.
-// Na przełamaniach stron kolumny się rozjeżdżają, stąd dodatkowe reguły dla kroków.
+// Splits a two-column line into the left (ingredients) and right (preparation) part.
+// Columns drift apart at page breaks, hence the extra rules for steps.
 function splitColumns(line, rightCol, leftIndent) {
   if (line.trim() === '') return ['', '']
   const indent = indentOf(line)
@@ -70,18 +70,18 @@ function splitColumns(line, rightCol, leftIndent) {
   const m = rest.match(/ {2,}/)
   const left = m ? rest.slice(0, m.index).trim() : rest.trim()
   const right = m ? rest.slice(m.index).trim() : ''
-  // Oceniamy tylko lewą część, bo w "175 g      pieprzem według uznania." kropka należy do kroku.
+  // Judge the left part only: in "175 g      pieprzem według uznania." the period belongs to the step.
   const looksLikeStep = /^\d{1,2}\.\s/.test(left) || (/\.$/.test(left) && !/[–(]/.test(left))
   if (looksLikeStep) return ['', rest.trim()]
   return [left, right]
 }
 
-// "Ryż basmati – 50 g" albo "Cebula – 0.5 sztuki (40 g)" / "Cebula – 0,5 x sztuka (40 g)"
+// "Ryż basmati – 50 g" or "Cebula – 0.5 sztuki (40 g)" / "Cebula – 0,5 x sztuka (40 g)"
 const ING_RE =
   /(?<name>[^–|]+?)\s+–\s+(?:(?<g1>\d+(?:[.,]\d+)?)\s*(?:g|ml)(?![\p{L}(])|(?<amt>\d+(?:[.,]\d+)?)\s+(?:x\s+)?(?<unit>[^()|–]+?)\s*\((?<g2>\d+(?:[.,]\d+)?)\s*(?:g|ml)\))/guy
 
-// Różne nazwy tego samego produktu w PDF-ie. Scalamy tylko to, co ma te same wartości odżywcze,
-// więc np. majonez i majonez light zostają osobno.
+// Different names for the same product in the PDF. Only products with the same nutritional values
+// are merged, so e.g. regular and light mayonnaise stay separate.
 const ALIASES = {
   'Bób świeży': 'Bób świeży lub mrożony',
   'Śmietanka 12%': 'Śmietana 12%',
@@ -115,19 +115,19 @@ function parseIngredients(text, warnings, title) {
       while (c[pos] === ' ') pos++
       ING_RE.lastIndex = pos
     }
-    if (pos < c.length) warnings.push(`${title}: nie sparsowano składników: "${c.slice(pos)}"`)
+    if (pos < c.length) warnings.push(`${title}: unparsed ingredients: "${c.slice(pos)}"`)
   }
   return out
 }
 
-// W PDF-ie zdarza się składnik wklejony w środek kroku ("…zimną wodę Koper posiekany – 2 łyżeczki (8 g) Sól…").
-// Nazwa to wielka litera plus maksymalnie dwa słowa, żeby nie złapać poprzedzającego zdania.
+// The PDF sometimes has an ingredient embedded in the middle of a step ("…zimną wodę Koper posiekany – 2 łyżeczki (8 g) Sól…").
+// The name is a capital letter plus at most two words, so the preceding sentence isn't captured.
 const STRAY_ING_RE =
   /\s*\p{Lu}\p{Ll}*(?: [\p{Ll}\d%]+){0,2} – \d+(?:[.,]\d+)? (?:x )?[^()–.]+? \(\d+(?:[.,]\d+)? (?:g|ml)\)/gu
 
 function extractStrayIngredients(text, warnings, title) {
   const found = text.match(STRAY_ING_RE) ?? []
-  for (const f of found) warnings.push(`${title}: przeniesiono z kroków do składników: "${f.trim()}"`)
+  for (const f of found) warnings.push(`${title}: moved from steps to ingredients: "${f.trim()}"`)
   return { stray: found.join(' '), rest: text.replace(STRAY_ING_RE, '') }
 }
 
@@ -148,7 +148,7 @@ for (let r = 0; r < metaIdx.length; r++) {
 
   const headerIdx = lines.slice(k, end).findIndex((l) => /SKŁADNIKI\s+PRZYGOTOWANIE/.test(l))
   if (headerIdx < 0) {
-    warnings.push(`${title}: brak nagłówka SKŁADNIKI`)
+    warnings.push(`${title}: missing SKŁADNIKI header`)
     continue
   }
   const hIdx = k + headerIdx
@@ -167,7 +167,7 @@ for (let r = 0; r < metaIdx.length; r++) {
   }
 
   const { stray, rest: stepText } = extractStrayIngredients(right.join(' ').replace(/\s+/g, ' '), warnings, title)
-  // "Woda – 1 łyżka (15 g) Do" / "podania": nagłówek grupy rozbity na dwie linie.
+  // "Woda – 1 łyżka (15 g) Do" / "podania": group header split across two lines.
   const ingredientText = `${left.join(' ')} ${stray}`
     .replace(/\s+/g, ' ')
     .replace(/(?<=\)|\d g) Do podania /g, ' |SEC:DO PODANIA| ')
@@ -193,5 +193,5 @@ for (let r = 0; r < metaIdx.length; r++) {
 }
 
 writeFileSync(outPath, JSON.stringify(recipes, null, 2) + '\n')
-console.log(`Przepisów: ${recipes.length}`)
-for (const w of warnings) console.warn('UWAGA:', w)
+console.log(`Recipes: ${recipes.length}`)
+for (const w of warnings) console.warn('WARNING:', w)

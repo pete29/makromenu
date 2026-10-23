@@ -1,138 +1,139 @@
-# Roadmapa
+# Roadmap
 
-Apka do układania tygodniowego jadłospisu z bazy przepisów. Plan jest wspólny dla dwóch osób, a porcje są przeliczane pod kaloryczność każdej z nich. Z planu generuje się lista zakupów.
+An app for planning a weekly menu from a recipe collection. The plan is shared by two people, and portions are scaled to each person's calorie target. A shopping list is generated from the plan.
 
-**Stack:** React + Vite + TypeScript, Tailwind CSS 4, Dexie (IndexedDB), vite-plugin-pwa, Vitest. Hosting na Vercelu albo GitHub Pages.
+**Stack:** React + Vite + TypeScript, Tailwind CSS 4, Dexie (IndexedDB), vite-plugin-pwa, Vitest. Hosting on Vercel or GitHub Pages.
 
-Legenda: `[x]` zrobione · `[~]` w trakcie · `[ ]` do zrobienia
+Legend: `[x]` done · `[~]` in progress · `[ ]` to do
 
-## Ustalenia
+## Decisions
 
-**Użytkownicy i cel**
-- Prywatny użytek: ja i moja dziewczyna. Projekt idzie też na GitHuba jako portfolio.
-- Inspiracja: Respo, ale własna implementacja.
+**Users and goal**
+- Private use: me and my girlfriend. The project also goes on GitHub as a portfolio piece.
+- Inspiration: Respo, but with my own implementation.
 
-**Platforma**
-- iPhone przez **PWA** („Dodaj do ekranu początkowego”), bez App Store'a.
-- Dlaczego nie natywnie (Expo/React Native): pracuję na Windowsie. Mac szwagra by wystarczył (Xcode), ale na darmowym koncie Apple podpis apki wygasa po 7 dniach, a konto deweloperskie kosztuje 99 $ rocznie. PWA jest darmowe, działa na stałe i daje klikalne demo do portfolio.
-- Logika (przeliczanie, lista zakupów) jest w czystym TS, więc w razie czego da się ją przenieść do Expo.
+**Platform**
+- iPhone via **PWA** ("Add to Home Screen"), no App Store.
+- Why not native (Expo/React Native): I work on Windows. My brother-in-law's Mac would do (Xcode), but with a free Apple account the app signature expires after 7 days, and a developer account costs $99 a year. A PWA is free, works permanently and gives a clickable portfolio demo.
+- The logic (scaling, shopping list) is plain TS, so it can be moved to Expo if needed.
 
-**Model planu**
-- **Jeden wspólny jadłospis** dla obu osób, ale **każda ma swoją kaloryczność**. Gotujemy raz, a każde nakłada swoją porcję.
-- Domyślnie 1500 kcal dziennie. Cel kcal i liczba posiłków są konfigurowalne dla każdej osoby.
-- Przy dużej różnicy kalorii, gdy przepis nie rozciąga się sensownie dla obu, apka proponuje np. dodatkową przekąskę zamiast skalować obiad ×2.
+**Plan model**
+- **One shared menu** for both people, but **each has their own calorie target**. We cook once and each person serves their own portion.
+- Default: 1500 kcal per day. Calorie target and number of meals are configurable per person.
+- When the calorie gap is large and a recipe doesn't stretch sensibly for both, the app suggests e.g. an extra snack instead of scaling dinner ×2.
 
-**Kalorie i porcje**
-- Kalorie wynikają z gramatury składników, a gramatury skalują się pod cel kcal.
-- „Zachować sens”: limity skalowania, zaokrąglanie sztuk i gramów, przyprawy się nie skalują.
-- W PDF-ie przy `porcje: N` składniki są podane na cały przepis, a kcal i makro na jedną porcję.
+**Calories and portions**
+- Calories come from ingredient weights, and weights are scaled to the calorie target.
+- "Keep it sensible": scaling limits, rounding of pieces and grams, spices are not scaled.
+- In the PDF, for recipes with `porcje: N` (servings) the ingredients are given for the whole recipe, while kcal and macros are per serving.
 
-**Przepisy**
-- Źródło: `Przepisy.pdf` (99 przepisów z planów od dietetyka).
-- **Sekcje z PDF-a (śniadania/obiady/kolacje/przekąski) ignorujemy**, bo są ułożone na rympał. Typ posiłku przypisujemy według tego, czym danie faktycznie jest. Jeden przepis może pasować do kilku posiłków, np. zupa na obiad albo na kolację.
-- Godziny z PDF-a (np. 7:00–10:00) pomijamy.
-- **Przepisy nie trafiają do publicznego repo** (prawa autorskie dietetyka). W repo jest kod i kilka przykładowych przepisów, a prawdziwa baza jest w pliku z `.gitignore`.
+**Recipes**
+- Source: `Przepisy.pdf` (99 recipes from dietitian plans).
+- **PDF sections (breakfasts/lunches/dinners/snacks) are ignored**, because they are arranged haphazardly. The meal type is assigned based on what the dish actually is. One recipe can fit several meals, e.g. soup for lunch or dinner.
+- Time windows from the PDF (e.g. 7:00–10:00) are skipped.
+- **Recipes do not go into the public repo** (the dietitian's copyright). The repo contains the code and a few sample recipes; the real database lives in a gitignored file.
 
-**Lista zakupów**
-- Wybieram zakres dni i dostaję łączne gramatury dla obu osób, pogrupowane po działach sklepu.
-- Później: przeliczanie na opakowania („2 × kostka masła 200 g”).
+**Shopping list**
+- I pick a range of days and get total weights for both people, grouped by store section.
+- Later: conversion to packages ("2 × 200 g butter block").
 
-**Sposób pracy**
-- Commit po każdym kroku, żeby zmiany były widoczne w Source Control.
+**Way of working**
+- Commit after every step so changes are visible in Source Control.
+- Commit messages and documentation in English; the app UI is in Polish.
 
 ---
 
-## Faza 0: Setup projektu
+## Phase 0: Project setup
 
-- [x] Szkielet Vite (React + TS)
-- [x] Zależności: dexie, dexie-react-hooks, vite-plugin-pwa, vitest
-- [x] Nazwa apki: **Makromenu**
-- [ ] Zmiana nazwy folderu `jadlospis` → `makromenu` (ręcznie, przy zamkniętym VS Code)
-- [x] `git init`, `.gitignore` (w tym prywatne dane z przepisami), pierwszy commit
-- [ ] Repo na GitHubie
-- [x] Wyczyszczenie domyślnego szablonu Vite
+- [x] Vite scaffold (React + TS)
+- [x] Dependencies: dexie, dexie-react-hooks, vite-plugin-pwa, vitest
+- [x] App name: **Makromenu**
+- [ ] Rename folder `jadlospis` → `makromenu` (manually, with VS Code closed)
+- [x] `git init`, `.gitignore` (including private recipe data), first commit
+- [ ] GitHub repo
+- [x] Clean up the default Vite template
 - [x] Tailwind CSS 4 (`@tailwindcss/vite`)
 
-## Faza 1: Import przepisów z PDF
+## Phase 1: Recipe import from PDF
 
-- [x] Wyciągnięcie tekstu z PDF-a (`pdftotext -enc UTF-8 -layout`; bez `-enc UTF-8` na Windowsie znikają polskie znaki)
-- [x] Parser [scripts/import-pdf.mjs](scripts/import-pdf.mjs): tekst → JSON (99/99 przepisów, 1005 składników)
-  - [x] nazwa, kcal, B/W/T, czas, liczba porcji
-  - [x] składniki: gramatura + miara domowa („2 sztuki (140 g)”)
-  - [x] grupy składników (Sos, Sałatka, Do podania…)
-  - [x] kroki przygotowania
-  - [x] gramatura przeniesiona do następnej linii („Mięso z piersi kurczaka –” / „250 g”)
-  - [x] nazwa składnika w jednej linii, „– 120 g” w następnej
-  - [x] „Rosół”, który ma kcal w innym miejscu niż reszta (cel: 99/99 przepisów)
-  - [x] składniki wklejone w PDF-ie w środek kroku (przenoszone do składników z ostrzeżeniem)
-  - [x] nagłówek grupy rozbity na dwie linie („Do” / „podania”)
-  - [x] zero ostrzeżeń parsera
-- [ ] Dane prywatne w `data/recipes.local.json` (poza gitem)
-- [ ] Kilka przykładowych przepisów w repo, żeby demo działało bez prywatnych danych
-- [ ] Przypisanie typów posiłków według dania, nie według sekcji w PDF-ie (przepis może mieć kilka typów, np. zupa = obiad lub kolacja)
-- [ ] Ręczny przegląd wyniku
+- [x] Extract text from the PDF (`pdftotext -enc UTF-8 -layout`; without `-enc UTF-8` Polish characters are lost on Windows)
+- [x] Parser [scripts/import-pdf.mjs](scripts/import-pdf.mjs): text → JSON (99/99 recipes, 1005 ingredients)
+  - [x] name, kcal, protein/carbs/fat, time, number of servings
+  - [x] ingredients: weight + household measure ("2 sztuki (140 g)")
+  - [x] ingredient groups (Sos, Sałatka, Do podania…)
+  - [x] preparation steps
+  - [x] weight wrapped to the next line ("Mięso z piersi kurczaka –" / "250 g")
+  - [x] ingredient name on one line, "– 120 g" on the next
+  - [x] "Rosół", which has kcal in a different place than the rest (goal: 99/99 recipes)
+  - [x] ingredients embedded in the middle of a step in the PDF (moved to ingredients with a warning)
+  - [x] group header split across two lines ("Do" / "podania")
+  - [x] zero parser warnings
+- [ ] Private data in `data/recipes.local.json` (outside git)
+- [ ] A few sample recipes in the repo so the demo works without private data
+- [ ] Assign meal types based on the dish, not the PDF section (a recipe can have several types, e.g. soup = lunch or dinner)
+- [ ] Manual review of the output
 
-## Faza 2: Baza składników
+## Phase 2: Ingredient database
 
-- [x] Lista unikalnych składników (210) i ujednolicenie duplikatów: mapa `ALIASES` w parserze (scalamy tylko produkty o tych samych wartościach odżywczych)
-- [ ] Wartości na 100 g: kcal, białko, tłuszcz, węglowodany
-- [ ] Waga sztuki dla składników liczonych w sztukach (jajko, kromka, tortilla, ząbek)
-- [ ] Flaga „nie skaluj” (sól, pieprz, przyprawy, woda)
-- [ ] Dział sklepowy (warzywa, nabiał, mięso, suche, przyprawy…)
-- [ ] Kontrola jakości: kcal wyliczone ze składników vs kcal z PDF-a (odchyłka ±10%)
+- [x] List of unique ingredients (210) and merging of duplicates: `ALIASES` map in the parser (only products with the same nutritional values are merged)
+- [ ] Values per 100 g: kcal, protein, fat, carbohydrates
+- [ ] Piece weight for ingredients counted in pieces (egg, slice of bread, tortilla, garlic clove)
+- [ ] "Don't scale" flag (salt, pepper, spices, water)
+- [ ] Store section (vegetables, dairy, meat, dry goods, spices…)
+- [ ] Quality check: kcal calculated from ingredients vs kcal from the PDF (±10% tolerance)
 
-## Faza 3: Silnik przeliczania (czysty TS + testy)
+## Phase 3: Scaling engine (plain TS + tests)
 
-- [ ] Profil osoby: cel kcal (domyślnie 1500), liczba posiłków, podział procentowy na posiłki
-- [ ] Przy dużej różnicy kcal między osobami: dodatkowa przekąska zamiast skrajnego skalowania
-- [ ] Cel kcal posiłku = cel dzienny × udział posiłku
-- [ ] Współczynnik skalowania = cel posiłku ÷ kcal porcji (z uwzględnieniem `porcje: N`)
-- [ ] Reguły „zdrowego rozsądku”:
-  - [ ] limit skalowania (np. 0,6–1,6×), poza nim sugestia innego przepisu lub przekąski
-  - [ ] sztuki zaokrąglane do całości lub połówek
-  - [ ] składniki „nie skaluj” bez zmian
-  - [ ] gramy zaokrąglane do 5 lub 10 g
-  - [ ] przeliczenie realnych kcal po zaokrągleniach i pokazanie różnicy od celu
-- [ ] Porcje dla dwóch osób z jednego przepisu: „na talerz” dla każdej osoby + „do ugotowania” razem
-- [ ] Podsumowanie dnia: kcal i makro dla każdej osoby
-- [ ] Lista zakupów: suma gramatur z wybranego zakresu dni dla obu osób, pogrupowana po działach
-- [ ] Testy jednostkowe (Vitest)
+- [ ] Person profile: calorie target (default 1500), number of meals, percentage split across meals
+- [ ] With a large calorie gap between people: an extra snack instead of extreme scaling
+- [ ] Meal calorie target = daily target × meal share
+- [ ] Scaling factor = meal target ÷ kcal per serving (accounting for `porcje: N`)
+- [ ] Common-sense rules:
+  - [ ] scaling limit (e.g. 0.6–1.6×); outside it, suggest another recipe or a snack
+  - [ ] pieces rounded to whole or half units
+  - [ ] "don't scale" ingredients unchanged
+  - [ ] grams rounded to 5 or 10 g
+  - [ ] recalculate real kcal after rounding and show the difference from the target
+- [ ] Portions for two people from one recipe: "per plate" for each person + "to cook" combined
+- [ ] Daily summary: kcal and macros per person
+- [ ] Shopping list: sum of weights over the selected range of days for both people, grouped by section
+- [ ] Unit tests (Vitest)
 
-## Faza 4: Warstwa danych w apce
+## Phase 4: App data layer
 
-- [ ] Schemat Dexie: `ingredients`, `recipes`, `profiles`, `mealPlan`, `shoppingChecks`
-- [ ] Import przepisów i składników z JSON-a przy pierwszym uruchomieniu
-- [ ] Eksport/import backupu do pliku
+- [ ] Dexie schema: `ingredients`, `recipes`, `profiles`, `mealPlan`, `shoppingChecks`
+- [ ] Import recipes and ingredients from JSON on first launch
+- [ ] Backup export/import to a file
 
-## Faza 5: Interfejs
+## Phase 5: User interface
 
-- [ ] Layout mobilny + dolna nawigacja
-- [ ] **Przepisy:** lista, wyszukiwarka, filtr po typie posiłku, szczegóły przepisu
-- [ ] **Ustawienia:** profile (imię, kcal, liczba posiłków, podział %)
-- [ ] **Planer tygodnia:**
-  - [ ] siatka dni × posiłki
-  - [ ] ręczny wybór i zamiana przepisu
-  - [ ] automatyczne wypełnienie tygodnia (pasujący typ posiłku, mało powtórzeń, przepisy, które dobrze się skalują)
-  - [ ] „ugotuj raz, jedz 2 dni” dla przepisów wieloporcjowych
-- [ ] **Widok dnia:** posiłki z porcjami dla każdej osoby, przełącznik „na talerz” / „do ugotowania”, suma kcal i makro
-- [ ] **Lista zakupów:** wybór zakresu dni, gramatury po działach, odhaczanie
-- [ ] Lista zakupów: przeliczanie na opakowania (później)
+- [ ] Mobile layout + bottom navigation
+- [ ] **Recipes:** list, search, filter by meal type, recipe details
+- [ ] **Settings:** profiles (name, kcal, number of meals, % split)
+- [ ] **Weekly planner:**
+  - [ ] days × meals grid
+  - [ ] manual recipe selection and swapping
+  - [ ] auto-fill the week (matching meal type, few repeats, recipes that scale well)
+  - [ ] "cook once, eat for 2 days" for multi-serving recipes
+- [ ] **Day view:** meals with portions for each person, "per plate" / "to cook" toggle, total kcal and macros
+- [ ] **Shopping list:** pick a range of days, weights by section, check-off
+- [ ] Shopping list: conversion to packages (later)
 
-## Faza 6: PWA i wdrożenie
+## Phase 6: PWA and deployment
 
-- [ ] Manifest, ikony, kolor motywu
-- [ ] Działanie offline (service worker)
-- [ ] Deploy na Vercel lub GitHub Pages
-- [ ] Test na iPhonie: „Dodaj do ekranu początkowego”
+- [ ] Manifest, icons, theme color
+- [ ] Offline support (service worker)
+- [ ] Deploy to Vercel or GitHub Pages
+- [ ] Test on iPhone: "Add to Home Screen"
 
-## Faza 7: Synchronizacja (opcjonalnie)
+## Phase 7: Sync (optional)
 
-- [ ] Supabase: wspólny plan i lista zakupów na dwóch telefonach
-- [ ] Logowanie (magic link)
-- [ ] Rozwiązywanie konfliktów (ostatni zapis wygrywa)
+- [ ] Supabase: shared plan and shopping list on two phones
+- [ ] Login (magic link)
+- [ ] Conflict resolution (last write wins)
 
-## Faza 8: Portfolio
+## Phase 8: Portfolio
 
-- [ ] README: opis, zrzuty ekranu, link do demo, jak działa przeliczanie
-- [ ] GitHub Actions: lint + testy + build
-- [ ] Demo na przykładowych przepisach
+- [ ] README: description, screenshots, demo link, how scaling works
+- [ ] GitHub Actions: lint + tests + build
+- [ ] Demo on sample recipes
