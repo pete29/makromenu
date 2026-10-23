@@ -31,3 +31,8 @@ data/private/
 # Dexie Cloud admin credentials (created by `npx dexie-cloud create`)
 dexie-cloud.key
 dexie-cloud.json
+
+# Playwright
+dist-e2e
+test-results
+playwright-report

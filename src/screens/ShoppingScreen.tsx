@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { db, type ShoppingCheck } from '../data/db'
 import { useProfiles, useRecipeMap } from '../data/hooks'
 import { shoppingList } from '../engine/plan'
@@ -19,8 +19,13 @@ export function ShoppingScreen() {
   const meals = useLiveQuery(() => db.mealPlan.where('date').between(from, to, true, true).toArray(), [from, to])
   const recipes = useRecipeMap()
   const profiles = useProfiles()
-  const checks = useLiveQuery(async () => new Set((await db.shoppingChecks.toArray()).map((c) => c.name)), [])
-  if (!meals || !recipes || !profiles || !checks) return null
+  const stored = useLiveQuery(async () => new Set((await db.shoppingChecks.toArray()).map((c) => c.name)), [])
+  // Ticks show at once; the database catches up a moment later and then replaces them.
+  const [pending, setPending] = useState(new Map<string, boolean>())
+  useEffect(() => setPending(new Map()), [stored])
+  if (!meals || !recipes || !profiles || !stored) return null
+
+  const checks = new Set([...stored, ...pending.keys()].filter((name) => pending.get(name) ?? stored.has(name)))
 
   const planned = meals.filter((m) => recipes.has(m.recipeId))
   const items = shoppingList(recipes, profiles, planned)
@@ -34,10 +39,12 @@ export function ShoppingScreen() {
   const checkedCount = items.filter((i) => checks.has(i.name)).length
 
   // Two devices can tick the same item offline, so unticking removes every check of that name.
-  const toggle = (name: string) =>
-    checks.has(name)
-      ? db.shoppingChecks.where('name').equals(name).delete()
-      : db.shoppingChecks.add({ name } as ShoppingCheck)
+  function toggle(name: string) {
+    const checked = !checks.has(name)
+    setPending(new Map(pending).set(name, checked))
+    if (checked) db.shoppingChecks.add({ name } as ShoppingCheck)
+    else db.shoppingChecks.where('name').equals(name).delete()
+  }
   const setRange = (start: string, end: string) => {
     setFrom(start)
     setTo(end)

@@ -1,0 +1,33 @@
+[
+  {
+    "id": "jajecznica-ze-szczypiorkiem",
+    "name": "Jajecznica ze szczypiorkiem",
+    "kcal": 420,
+    "protein": 24,
+    "carbs": 30,
+    "fat": 22,
+    "servings": 1,
+    "ingredients": [
+      { "name": "Jajko kurze całe", "grams": 168, "amount": 3, "unit": "sztuki" },
+      { "name": "Chleb żytni razowy", "grams": 60, "amount": 2, "unit": "kromki" },
+      { "name": "Szczypiorek siekany", "grams": 5 },
+      { "name": "Sól", "grams": 0.25, "amount": 1, "unit": "szczypta" }
+    ],
+    "steps": ["Jajka smażymy, posypujemy szczypiorkiem i podajemy z chlebem."]
+  },
+  {
+    "id": "makaron-z-pesto",
+    "name": "Makaron z pesto i kurczakiem",
+    "kcal": 520,
+    "protein": 38,
+    "carbs": 55,
+    "fat": 15,
+    "servings": 1,
+    "ingredients": [
+      { "name": "Makaron pełnoziarnisty", "grams": 70 },
+      { "name": "Mięso z piersi kurczaka", "grams": 130 },
+      { "name": "Pesto zielone", "grams": 20, "amount": 1, "unit": "łyżka" }
+    ],
+    "steps": ["Makaron gotujemy, kurczaka smażymy, łączymy z pesto."]
+  }
+]

@@ -151,6 +151,7 @@ Dexie Cloud instead of Supabase: the app already uses Dexie, so sync is an addon
 
 ## Phase 8: Portfolio
 
-- [~] README: description, demo link and how scaling works done; screenshots to add
+- [x] README: description, screenshots, demo link, how scaling works, architecture and decisions
 - [x] GitHub Actions: lint + tests + build on every push and PR, deploy from `main`
-- [ ] Demo on sample recipes
+- [x] Demo on sample recipes
+- [x] End-to-end tests (Playwright) in CI on sample recipes ([e2e/](e2e))
