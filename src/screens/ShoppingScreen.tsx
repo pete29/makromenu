@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import { db, type ShoppingCheck } from '../data/db'
-import { useProfiles, useRecipeMap } from '../data/hooks'
+import { useMeals, useProfiles, useRecipeMap } from '../data/hooks'
 import { shoppingList } from '../engine/plan'
 import { SECTIONS, sectionOf } from '../engine/sections'
 import { addDays, dayMonth, startOfWeek, toISODate, weekdayShort } from '../ui/dates'
@@ -16,7 +16,7 @@ export function ShoppingScreen() {
   const [from, setFrom] = useState(today)
   const [to, setTo] = useState(sunday)
 
-  const meals = useLiveQuery(() => db.mealPlan.where('date').between(from, to, true, true).toArray(), [from, to])
+  const meals = useMeals(from, to)
   const recipes = useRecipeMap()
   const profiles = useProfiles()
   const stored = useLiveQuery(async () => new Set((await db.shoppingChecks.toArray()).map((c) => c.name)), [])

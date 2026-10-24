@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useMemo, useState } from 'react'
 import type { Profile } from '../engine/profile'
-import { db, type StoredRecipe } from './db'
+import { db, type StoredMeal, type StoredRecipe } from './db'
 import { defaultProfiles, SAMPLE_RECIPES } from './defaults'
 import { useHouseholdRealmId } from './household'
 
@@ -27,6 +27,22 @@ export function useProfiles(): Profile[] | undefined {
         : undefined,
     [stored, realmId],
   )
+}
+
+/**
+ * Planned meals between two dates (inclusive), only those of the current plan. Meals of another
+ * plan can be synced too, e.g. ones left in the private realm after joining the shared plan, or
+ * shared ones arriving before the realm membership that tells us we are in it. Their eaters aren't
+ * among the profiles, and the plan's calculations can't portion a meal for an unknown person.
+ */
+export function useMeals(from: string, to: string): StoredMeal[] | undefined {
+  const meals = useLiveQuery(() => db.mealPlan.where('date').between(from, to, true, true).toArray(), [from, to])
+  const profiles = useProfiles()
+  return useMemo(() => {
+    if (!meals || !profiles) return undefined
+    const ids = new Set(profiles.map((p) => p.id))
+    return meals.filter((m) => m.profileIds.every((id) => ids.has(id)))
+  }, [meals, profiles])
 }
 
 /**
